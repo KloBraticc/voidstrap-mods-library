@@ -1,4 +1,4 @@
-import type { Register } from 'voidstrap';
+import type { Engine, Register } from 'voidstrap';
 
 const count = atom('count', -1);
 
@@ -18,7 +18,7 @@ export const register: Register = (on) => {
   let busy = false;
   let timerId = 0;
 
-  const refresh = async ($) => {
+  const refresh = async ($: Engine) => {
     if (busy) return;
     busy = true;
     try {
@@ -34,13 +34,13 @@ export const register: Register = (on) => {
           }
         }
       } catch {
-        // Fallback to public endpoint via account userId
+        // Fallback to userId endpoint via $.roblox.request
       }
 
       try {
         const me = await $.roblox.account();
         if (me && typeof me.userId === 'number' && me.userId > 0) {
-          const pub = await $.net.fetch('https://friends.roblox.com/v1/users/' + me.userId + '/friends/count');
+          const pub = await $.roblox.request('https://friends.roblox.com/v1/users/' + me.userId + '/friends/count');
           if (pub && pub.ok) {
             const parsed = parseCount(pub.text);
             if (parsed !== null && read($, count) !== parsed) {

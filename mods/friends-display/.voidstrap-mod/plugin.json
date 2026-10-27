@@ -2,12 +2,8 @@
   "name": "friends-display",
   "version": "1.0.0",
   "description": "Live Roblox friend counter pill anchored next to the top-right navigation arrows, with real-time updates.",
-  "network": [
-    "friends.roblox.com"
-  ],
-  "permissions": [
-    "roblox-account"
-  ],
+  "network": [],
+  "permissions": ["roblox-account"],
   "userConfig": {},
   "library": {
     "id": "195697851/friends-display",
