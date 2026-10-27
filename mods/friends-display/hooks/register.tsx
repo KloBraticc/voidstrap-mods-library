@@ -2,13 +2,15 @@ import type { Engine, Register } from 'voidstrap';
 
 const count = atom('count', -1);
 
-const parseCount = (text: string): number | null => {
+const parseCount = ($: Engine, text: string): number | null => {
   try {
     const data = JSON.parse(text);
     if (data && typeof data.count === 'number' && Number.isFinite(data.count) && data.count >= 0) {
       return data.count;
     }
-  } catch {}
+  } catch (err) {
+    $.log(`Failed to parse friend count JSON: ${String(err)}`);
+  }
   return null;
 };
 
@@ -23,7 +25,7 @@ export const register: Register = (on) => {
       try {
         const r = await $.roblox.request('https://friends.roblox.com/v1/my/friends/count');
         if (r && r.ok) {
-          const parsed = parseCount(r.text);
+          const parsed = parseCount($, r.text);
           if (parsed !== null) {
             if (read($, count) !== parsed) {
               $.state.set('count', parsed);
@@ -31,20 +33,24 @@ export const register: Register = (on) => {
             return;
           }
         }
-      } catch {}
+      } catch (err) {
+        $.log(`Primary friend count request failed: ${String(err)}`);
+      }
 
       try {
         const me = await $.roblox.account();
         if (me && typeof me.userId === 'number' && me.userId > 0) {
-          const pub = await $.roblox.request('https://friends.roblox.com/v1/users/' + me.userId + '/friends/count');
+          const pub = await $.roblox.request(`https://friends.roblox.com/v1/users/${me.userId}/friends/count`);
           if (pub && pub.ok) {
-            const parsed = parseCount(pub.text);
+            const parsed = parseCount($, pub.text);
             if (parsed !== null && read($, count) !== parsed) {
               $.state.set('count', parsed);
             }
           }
         }
-      } catch {}
+      } catch (err) {
+        $.log(`Fallback friend count request failed: ${String(err)}`);
+      }
     } finally {
       busy = false;
     }
@@ -57,6 +63,14 @@ export const register: Register = (on) => {
       $.clock.cancel(timerId);
     }
     timerId = $.clock.every(5000, () => refresh($));
+    return next(e);
+  });
+
+  on('session.end', ($, e, next) => {
+    if (timerId > 0) {
+      $.clock.cancel(timerId);
+      timerId = 0;
+    }
     return next(e);
   });
 
@@ -77,9 +91,10 @@ export const register: Register = (on) => {
 
   on('ui.render', { component: 'Widget', requestId: 'friends' }, ($) => {
     const { Card, Image, Text } = $.ui.resolve();
-    const n = read($, count);
+    const raw = read($, count);
+    const n = typeof raw === 'number' && Number.isFinite(raw) ? raw : -1;
     const display = n < 0 ? '...' : n.toLocaleString();
-    const tip = n < 0 ? "Friend's Display: Loading Roblox friends..." : `Friend's Display: ${n.toLocaleString()} Roblox friends (live)`;
+    const tip = n < 0 ? `Friend's Display: Loading Roblox friends...` : `Friend's Display: ${n.toLocaleString()} Roblox friends (live)`;
 
     return (
       <Card
