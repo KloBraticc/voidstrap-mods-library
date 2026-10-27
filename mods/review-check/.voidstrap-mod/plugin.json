@@ -1,0 +1,8 @@
+{
+  "name": "review-check",
+  "version": "1.0.0",
+  "description": "Shows a pane with the current time. Used to test the library review pipeline.",
+  "tags": ["utility"],
+  "network": [],
+  "userConfig": {}
+}
