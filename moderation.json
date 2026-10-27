@@ -1,14 +1,7 @@
 {
   "schema": 1,
   "trusted": [],
-  "verified": {
-    "195697851/example-hello": {
-      "version": "1.0.0",
-      "fingerprint": "e1b0585ed917b4064a8f6c26f001ed86f1ea39ba8ac116713ffb0eab4a26fdd9",
-      "by": "KloBraticc",
-      "at": "2026-10-27T18:15:46.015Z"
-    }
-  },
+  "verified": {},
   "featured": {},
   "takedowns": {
     "195697851/note-pad-test": {
@@ -20,6 +13,11 @@
       "reason": "test mod, not for users",
       "by": "KloBraticc",
       "at": "2026-10-27T22:06:35.706Z"
+    },
+    "195697851/example-hello": {
+      "reason": "test mod, not for users",
+      "by": "KloBraticc",
+      "at": "2026-10-27T22:06:55.639Z"
     }
   },
   "banned": []
