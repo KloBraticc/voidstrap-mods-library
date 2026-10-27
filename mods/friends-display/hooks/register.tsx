@@ -8,9 +8,7 @@ const parseCount = (text: string): number | null => {
     if (data && typeof data.count === 'number' && Number.isFinite(data.count) && data.count >= 0) {
       return data.count;
     }
-  } catch {
-    // ignore malformed json
-  }
+  } catch {}
   return null;
 };
 
@@ -33,9 +31,7 @@ export const register: Register = (on) => {
             return;
           }
         }
-      } catch {
-        // Fallback to userId endpoint via $.roblox.request
-      }
+      } catch {}
 
       try {
         const me = await $.roblox.account();
@@ -48,9 +44,7 @@ export const register: Register = (on) => {
             }
           }
         }
-      } catch {
-        // Ignore transient network errors
-      }
+      } catch {}
     } finally {
       busy = false;
     }
