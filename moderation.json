@@ -11,11 +11,6 @@
   },
   "featured": {},
   "takedowns": {
-    "195697851/review-check": {
-      "reason": "test mod used to check the review pipeline",
-      "by": "KloBraticc",
-      "at": "2026-10-27T21:17:13.693Z"
-    },
     "195697851/note-pad-test": {
       "reason": "test mod used to check review comments",
       "by": "KloBraticc",
