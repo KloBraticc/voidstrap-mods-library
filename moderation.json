@@ -15,6 +15,11 @@
       "reason": "test mod used to check review comments",
       "by": "KloBraticc",
       "at": "2026-10-27T21:25:01.779Z"
+    },
+    "195697851/review-check": {
+      "reason": "test mod, not for users",
+      "by": "KloBraticc",
+      "at": "2026-10-27T22:06:35.706Z"
     }
   },
   "banned": []
