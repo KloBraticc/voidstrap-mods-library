@@ -290,16 +290,19 @@ export const register: Register = (on) => {
           </Box>
         )}
 
-        <NumberInput
-          key="fake-amount"
-          label="Fake Robux amount"
-          value={read($, fakeAmount)}
-          min={0}
-          max={999999999}
-          step={100}
-          disabled={!isFake}
-          onChange={(value) => persistFakeAmount($, value)}
-        />
+        {isFake ? (
+          <NumberInput
+            key="fake-amount"
+            label="Fake Robux amount"
+            value={read($, fakeAmount)}
+            min={0}
+            max={999999999}
+            step={100}
+            onChange={(value) => persistFakeAmount($, value)}
+          />
+        ) : (
+          <Text text="Turn on Fake balance to edit the demo amount." dim={true} wrap={true} />
+        )}
 
         <Text text="Text color (hex)" bold={true} />
         <TextInput
