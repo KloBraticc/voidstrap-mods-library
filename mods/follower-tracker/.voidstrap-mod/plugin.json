@@ -1,0 +1,14 @@
+{
+  "name": "follower-tracker",
+  "version": "1.0.0",
+  "description": "Shows your Roblox follower count next to the Back and Next arrows, with live gain/loss tracking.",
+  "network": [],
+  "permissions": [
+    "roblox-account"
+  ],
+  "userConfig": {},
+  "library": {
+    "id": "349421550/follower-tracker",
+    "ownerId": 349421550
+  }
+}
