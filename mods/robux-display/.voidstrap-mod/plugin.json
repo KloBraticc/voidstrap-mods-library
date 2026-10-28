@@ -1,6 +1,6 @@
 {
   "name": "robux-display",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Shows your Roblox Robux balance beside the Friends counter with local display customization.",
   "network": [],
   "permissions": [

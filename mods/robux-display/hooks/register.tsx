@@ -5,11 +5,14 @@ const accountName = atom('robux-account-name', 'Checking Roblox account…');
 const accountStatus = atom('robux-account-status', 'Loading…');
 const fakeMode = atom('robux-fake-mode', false);
 const fakeAmount = atom('robux-fake-amount', 123456);
-const textColor = atom('robux-text-color', '#F4C542');
-const colorDraft = atom('robux-color-draft', '#F4C542');
+const showPending = atom('robux-show-pending', false);
+const pendingBalance = atom('robux-pending-balance', -1);
+const pendingStatus = atom('robux-pending-status', 'Pending balance not loaded.');
+const textColor = atom('robux-text-color', '#FFFFFF');
+const colorDraft = atom('robux-color-draft', '#FFFFFF');
 
-const colorBrush = (hex: string) => /^#[0-9a-fA-F]{6}$/.test(hex) ? '#FF' + hex.slice(1) : '#FFF4C542';
-const formatRobux = (value: number) => Math.max(0, Math.floor(value)).toLocaleString();
+const colorBrush = (hex: string) => /^#[0-9a-fA-F]{6}$/.test(hex) ? '#FF' + hex.slice(1) : '#FFFFFFFF';
+const formatRobux = (value: number) => Math.max(0, Math.floor(value)).toLocaleString('en-US');
 
 
 const persistFakeMode = ($: Engine, value: boolean) => {
@@ -38,9 +41,11 @@ export const register: Register = (on) => {
   const restoreSettings = ($: Engine) => {
     const savedFake = $.store.get('fakeMode');
     const savedAmount = $.store.get('fakeAmount');
+    const savedShowPending = $.store.get('showPending');
     const savedColor = $.store.get('textColor');
 
     if (typeof savedFake === 'boolean') update($, fakeMode, () => savedFake);
+    if (typeof savedShowPending === 'boolean') update($, showPending, () => savedShowPending);
     if (typeof savedAmount === 'number' && Number.isFinite(savedAmount)) {
       update($, fakeAmount, () => Math.max(0, Math.min(999999999, Math.floor(savedAmount))));
     }
@@ -50,45 +55,96 @@ export const register: Register = (on) => {
     }
   };
 
-  const refreshBalance = async ($: Engine) => {
-    if (busy || read($, fakeMode)) return;
-    busy = true;
-    update($, accountStatus, () => 'Checking your Roblox account…');
+  const refreshPendingBalance = async ($: Engine, userId?: number) => {
+    if (!read($, showPending)) return;
 
+    if (typeof userId !== 'number' || !Number.isFinite(userId) || userId <= 0) {
+      update($, pendingBalance, () => -1);
+      update($, pendingStatus, () => 'Roblox did not provide an account ID for pending sales.');
+      return;
+    }
+
+    update($, pendingStatus, () => 'Checking pending sales…');
     try {
-      const account = await $.roblox.account();
-      if (!account.signedIn) {
-        update($, balance, () => -1);
-        update($, accountName, () => 'No Roblox account connected');
-        update($, accountStatus, () => 'Connect a Roblox account in Voidstrap to show your live balance.');
-        return;
-      }
-
-      const name = account.displayName || account.username || 'Roblox account';
-      update($, accountName, () => 'Connected as ' + name);
-
-      const response = await $.roblox.request('https://economy.roblox.com/v1/user/currency');
+      const url = 'https://economy.roblox.com/v2/users/' + userId + '/transaction-totals?timeFrame=Year&transactionType=summary';
+      const response = await $.roblox.request(url);
       if (!response.ok) {
-        update($, accountStatus, () => 'Balance request failed (' + response.status + '). Check Roblox account access.');
+        update($, pendingBalance, () => -1);
+        update($, pendingStatus, () => 'Pending sales request failed (' + response.status + ').');
         return;
       }
 
       const data = JSON.parse(response.text);
-      if (!data || typeof data.robux !== 'number' || !Number.isFinite(data.robux) || data.robux < 0) {
-        update($, accountStatus, () => 'Roblox returned an unexpected balance response.');
+      const total = typeof data?.pendingRobuxTotal === 'number'
+        ? data.pendingRobuxTotal
+        : data?.pendingRobux;
+      if (typeof total !== 'number' || !Number.isFinite(total) || total < 0) {
+        update($, pendingBalance, () => -1);
+        update($, pendingStatus, () => 'Roblox returned no pending sales total.');
         return;
       }
 
-      update($, balance, () => Math.floor(data.robux));
-      update($, accountStatus, () => 'Live balance updated. Refreshes every 30 seconds.');
+      update($, pendingBalance, () => Math.floor(total));
+      update($, pendingStatus, () => 'Pending sales total updated. Refreshes every 30 seconds.');
     } catch (error) {
-      update($, accountStatus, () => 'Could not read the balance. Approve Roblox account access in Voidstrap.');
-      $.log('Robux balance refresh failed: ' + String(error));
+      update($, pendingBalance, () => -1);
+      update($, pendingStatus, () => 'Could not read pending sales.');
+      $.log('Pending Robux refresh failed: ' + String(error));
+    }
+  };
+
+  const refreshBalance = async ($: Engine) => {
+    const isFake = read($, fakeMode);
+    const includePending = read($, showPending);
+    if (busy || (isFake && !includePending)) return;
+    busy = true;
+    if (!isFake) update($, accountStatus, () => 'Checking your Roblox account…');
+
+    try {
+      const account = await $.roblox.account();
+      if (!account.signedIn) {
+        if (!isFake) {
+          update($, balance, () => -1);
+          update($, accountName, () => 'No Roblox account connected');
+          update($, accountStatus, () => 'Connect a Roblox account in Voidstrap to show your live balance.');
+        }
+        if (includePending) {
+          update($, pendingBalance, () => -1);
+          update($, pendingStatus, () => 'Connect a Roblox account in Voidstrap to show pending sales.');
+        }
+        return;
+      }
+
+      if (!isFake) {
+        const name = account.displayName || account.username || 'Roblox account';
+        update($, accountName, () => 'Connected as ' + name);
+
+        const response = await $.roblox.request('https://economy.roblox.com/v1/user/currency');
+        if (!response.ok) {
+          update($, accountStatus, () => 'Balance request failed (' + response.status + '). Check Roblox account access.');
+        } else {
+          const data = JSON.parse(response.text);
+          if (!data || typeof data.robux !== 'number' || !Number.isFinite(data.robux) || data.robux < 0) {
+            update($, accountStatus, () => 'Roblox returned an unexpected balance response.');
+          } else {
+            update($, balance, () => Math.floor(data.robux));
+            update($, accountStatus, () => 'Live balance updated. Refreshes every 30 seconds.');
+          }
+        }
+      }
+
+      if (includePending) await refreshPendingBalance($, account.userId);
+    } catch (error) {
+      if (!isFake) update($, accountStatus, () => 'Could not read the balance. Approve Roblox account access in Voidstrap.');
+      if (includePending) {
+        update($, pendingBalance, () => -1);
+        update($, pendingStatus, () => 'Could not read pending sales.');
+      }
+      $.log('Robux refresh failed: ' + String(error));
     } finally {
       busy = false;
     }
   };
-
   on('session.start', ($, e, next) => {
     restoreSettings($);
     $.sidebar.addPage({ id: 'robux', title: 'Robux', icon: 'Money', section: 'More' });
@@ -111,18 +167,20 @@ export const register: Register = (on) => {
   });
 
   on('page.navigate', ($, e, next) => {
-    if (!read($, fakeMode)) void refreshBalance($);
+    if (!read($, fakeMode) || read($, showPending)) void refreshBalance($);
     return next(e);
   });
 
   on('ui.render', { component: 'Widget', requestId: 'robux-display' }, ($) => {
-    const { Card, Text } = $.ui.resolve();
+    const { Box, Card, Image, Text } = $.ui.resolve();
     const isFake = read($, fakeMode);
     const currentBalance = read($, balance);
+    const displayPending = read($, showPending);
+    const currentPendingBalance = read($, pendingBalance);
     const amount = isFake
       ? formatRobux(read($, fakeAmount))
       : currentBalance >= 0 ? formatRobux(currentBalance) : '—';
-    const label = isFake ? 'FAKE R$ ' + amount : 'R$ ' + amount;
+
     const tooltip = isFake
       ? 'FAKE demo balance. This is local display only, not your Roblox balance.'
       : read($, accountStatus);
@@ -139,8 +197,16 @@ export const register: Register = (on) => {
         borderThickness={1}
         tooltip={tooltip}
       >
+        <Image
+          src="icon.ico"
+          width={15}
+          height={15}
+          margin="0"
+          verticalAlignment="center"
+        />
+        {isFake && <Text text="FAKE" bold={true} size={10} color="#FFFFB547" margin="0" verticalAlignment="center" wrap={false} />}
         <Text
-          text={label}
+          text={amount}
           bold={true}
           size={12}
           color={colorBrush(read($, textColor))}
@@ -148,15 +214,25 @@ export const register: Register = (on) => {
           verticalAlignment="center"
           wrap={false}
         />
+        {displayPending && currentPendingBalance >= 0 && (
+          <Box direction="row" gap={2} align="center">
+            <Text text="(" size={9} dim={true} margin="0" verticalAlignment="center" />
+            <Image src="icon.ico" width={9} height={9} margin="0" verticalAlignment="center" />
+            <Text text={formatRobux(currentPendingBalance)} size={10} dim={true} margin="0" verticalAlignment="center" wrap={false} />
+            <Text text=" pending)" size={9} dim={true} margin="0" verticalAlignment="center" wrap={false} />
+          </Box>
+        )}
       </Card>
     );
   });
 
   on('ui.render', { component: 'Page', requestId: 'robux' }, ($) => {
-    const { Box, Text, Badge, Divider, Toggle, NumberInput, TextInput, Button } = $.ui.resolve();
+    const { Box, Image, Text, Badge, Divider, Toggle, NumberInput, TextInput, Button } = $.ui.resolve();
     const isFake = read($, fakeMode);
     const shownBalance = isFake ? read($, fakeAmount) : read($, balance);
-    const shownBalanceText = shownBalance >= 0 ? 'R$ ' + formatRobux(shownBalance) : 'R$ —';
+    const shownBalanceText = shownBalance >= 0 ? formatRobux(shownBalance) : '—';
+    const showPendingValue = read($, showPending);
+    const shownPendingBalance = read($, pendingBalance);
 
     return (
       <Box direction="column" gap={14} padding={20}>
@@ -166,7 +242,10 @@ export const register: Register = (on) => {
         </Box>
 
         <Text text={read($, accountName)} dim={true} wrap={true} />
-        <Text text={shownBalanceText} size={28} bold={true} color={colorBrush(read($, textColor))} />
+        <Box direction="row" gap={8} align="center">
+          <Image src="icon.ico" width={30} height={30} margin="0" verticalAlignment="center" />
+          <Text text={shownBalanceText} size={28} bold={true} color={colorBrush(read($, textColor))} />
+        </Box>
         <Text text={read($, accountStatus)} dim={true} wrap={true} />
         <Divider />
 
@@ -176,11 +255,40 @@ export const register: Register = (on) => {
           checked={isFake}
           onChange={(value) => {
             persistFakeMode($, value);
-            if (!value) void refreshBalance($);
+            void refreshBalance($);
           }}
         />
 
         <Text text="Fake mode changes only the number shown in this launcher. The chip is labeled FAKE and never changes your Roblox account." dim={true} wrap={true} />
+
+        <Toggle
+          key="pending-display"
+          label="Show pending Robux from sales"
+          checked={showPendingValue}
+          onChange={(value) => {
+            update($, showPending, () => value);
+            $.store.set('showPending', value);
+            if (value) {
+              update($, pendingStatus, () => 'Checking pending sales…');
+              void refreshBalance($);
+            } else {
+              update($, pendingBalance, () => -1);
+              update($, pendingStatus, () => 'Pending display is off.');
+            }
+          }}
+        />
+        <Text text="When enabled, shows Robux from recent sales that Roblox has not released yet. Refreshes every 30 seconds." dim={true} wrap={true} />
+        {showPendingValue && (
+          <Box direction="column" gap={4}>
+            <Box direction="row" gap={6} align="center">
+              <Text text="(" size={13} dim={true} />
+              <Image src="icon.ico" width={16} height={16} margin="0" verticalAlignment="center" />
+              <Text text={shownPendingBalance >= 0 ? formatRobux(shownPendingBalance) : '—'} size={18} bold={true} color={colorBrush(read($, textColor))} />
+              <Text text=" pending)" size={13} dim={true} />
+            </Box>
+            {shownPendingBalance < 0 && <Text text={read($, pendingStatus)} dim={true} wrap={true} />}
+          </Box>
+        )}
 
         <NumberInput
           key="fake-amount"
@@ -189,6 +297,7 @@ export const register: Register = (on) => {
           min={0}
           max={999999999}
           step={100}
+          disabled={!isFake}
           onChange={(value) => persistFakeAmount($, value)}
         />
 
@@ -196,15 +305,19 @@ export const register: Register = (on) => {
         <TextInput
           key="text-color"
           value={read($, colorDraft)}
-          placeholder="#F4C542"
+          placeholder="#FFFFFF"
           onChange={(value) => update($, colorDraft, () => value)}
           onSubmit={(value) => {
             if (!persistTextColor($, value)) {
-              $.ui.toast('Invalid color', 'Enter a hex color such as #F4C542.');
+              $.ui.toast('Invalid color', 'Enter a hex color such as #FFFFFF.');
             }
           }}
         />
-        <Text text={'Preview: ' + (isFake ? 'FAKE ' : '') + shownBalanceText} size={18} bold={true} color={colorBrush(read($, textColor))} />
+        <Box direction="row" gap={6} align="center">
+          <Text text={'Preview:' + (isFake ? ' FAKE' : '')} size={18} bold={true} />
+          <Image src="icon.ico" width={18} height={18} margin="0" verticalAlignment="center" />
+          <Text text={shownBalanceText} size={18} bold={true} color={colorBrush(read($, textColor))} />
+        </Box>
 
         <Button
           key="refresh-now"
