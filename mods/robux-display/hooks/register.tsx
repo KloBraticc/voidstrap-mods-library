@@ -147,7 +147,7 @@ export const register: Register = (on) => {
   };
   on('session.start', ($, e, next) => {
     restoreSettings($);
-    $.sidebar.addPage({ id: 'robux', title: 'Robux', icon: 'Money', section: 'More' });
+    $.sidebar.addPage({ id: 'robux', title: 'Robux', icon: 'Money24', section: 'More' });
     // Same slot used by friends-display. When that mod is present, these chips sit together;
     // when it is absent, this chip occupies its slot beside the Back button.
     $.ui.attach({ id: 'robux-display', anchor: 'TopNavBack', placement: 'before' });
