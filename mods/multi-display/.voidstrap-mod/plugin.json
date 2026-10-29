@@ -1,0 +1,15 @@
+{
+  "name": "multi-display",
+  "version": "1.0.0",
+  "description": "Adds pills to the Voidstrap top bar showing your FastFlag count, mods running, Roblox status, and session time. Toggle each pill from the sidebar settings page.",
+  "tags": [
+    "stats",
+    "theme"
+  ],
+  "network": [],
+  "userConfig": {},
+  "library": {
+    "id": "93396286/multi-display",
+    "ownerId": 93396286
+  }
+}
