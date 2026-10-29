@@ -1,4 +1,4 @@
-import type { Register } from 'voidstrap';
+import type { Atom, Register } from 'voidstrap';
 
 const showFfFlags = atom('multiDisplayShowFfFlags', true);
 const showModsRunning = atom('multiDisplayShowModsRunning', true);
@@ -9,7 +9,7 @@ const robloxRunning = atom('multiDisplayRobloxRunning', false);
 
 let refreshTimer = 0;
 
-const toggleKeys: Array<[string, import('voidstrap').Atom<boolean>]> = [
+const toggleKeys: Array<[string, Atom<boolean>]> = [
   ['multiDisplayShowFfFlags', showFfFlags],
   ['multiDisplayShowModsRunning', showModsRunning],
   ['multiDisplayShowRobloxStatus', showRobloxStatus],
@@ -25,11 +25,10 @@ export const register: Register = (on) => {
       }
     }
 
-    $.sidebar.addPage({
+    $.modpages.add({
       id: 'multi-display-settings',
       title: 'Multi Display',
       icon: 'Settings24',
-      section: 'Configuration',
     });
 
     $.ui.attach({ id: 'multi-display', anchor: 'TopNavBack', placement: 'before' });
@@ -53,6 +52,8 @@ export const register: Register = (on) => {
       $.clock.cancel(refreshTimer);
       refreshTimer = 0;
     }
+    $.modpages.remove('multi-display-settings');
+    $.ui.detach('multi-display');
     return next(e);
   });
 
@@ -112,8 +113,9 @@ export const register: Register = (on) => {
     const scale = Number($.settings.get('UiCornerScale') || 1.5);
     const radius = Math.max(8, Math.round(scale * 10));
 
-    const pill = (iconSrc: string, label: string, value: string) => (
+    const pill = (key: string, iconSrc: string, label: string, value: string) => (
       <Card
+        key={key}
         direction="row"
         gap={6}
         padding="10,4"
@@ -132,19 +134,19 @@ export const register: Register = (on) => {
 
     const pills: Array<import('voidstrap').Node> = [];
     if (read($, showFfFlags)) {
-      pills.push(pill('fflag.png', 'FF', String(Object.keys($.fastFlags.getAll()).length)));
+      pills.push(pill('fflag', 'fflag.png', 'FF', String(Object.keys($.fastFlags.getAll()).length)));
     }
     if (read($, showModsRunning)) {
-      pills.push(pill('mods.png', 'Mods', String($.sidebar.get().pages.filter((p) => !!p.plugin).length)));
+      pills.push(pill('mods', 'mods.png', 'Mods', String($.sidebar.get().pages.filter((p) => !!p.plugin).length)));
     }
     if (read($, showRobloxStatus)) {
-      pills.push(pill('rblx.png', 'Roblox', read($, robloxRunning) ? 'Running' : 'Stopped'));
+      pills.push(pill('rblx', 'rblx.png', 'Roblox', read($, robloxRunning) ? 'Running' : 'Stopped'));
     }
     if (read($, showSessionTime)) {
       const s = read($, sessionSeconds);
       const m = Math.floor(s / 60);
       const h = Math.floor(m / 60);
-      pills.push(pill('session.png', 'Session', `${h}h ${m % 60}m ${s % 60}s`));
+      pills.push(pill('session', 'session.png', 'Session', `${h}h ${m % 60}m ${s % 60}s`));
     }
 
     if (pills.length === 0) {
