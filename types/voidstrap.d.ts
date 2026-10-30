@@ -17,6 +17,70 @@ declare module 'voidstrap' {
     attachable: boolean;
   }
 
+  export type UiStylePreset = 'glass' | 'midnight' | 'light';
+
+  export interface UiStyle {
+    preset?: UiStylePreset;
+    background?: string;
+    surface?: string;
+    border?: string;
+    text?: string;
+    muted?: string;
+    accent?: string;
+    radius?: string;
+    backdrop?: 'Mica' | 'Aero' | 'Acrylic' | string;
+  }
+
+  export interface UiTarget {
+    window?: string;
+    name?: string;
+    type?: string;
+    text?: string;
+    textContains?: string;
+    parent?: string;
+    ancestor?: string;
+    page?: string;
+    index?: number;
+    all?: boolean;
+  }
+
+  export interface UiNode {
+    type: string;
+    name?: string;
+    text?: string;
+    visible: boolean;
+    panel: boolean;
+    x?: number;
+    y?: number;
+    width?: number;
+    height?: number;
+    children?: UiNode[];
+  }
+
+  export interface UiProperties {
+    hidden?: boolean;
+    rotate?: number;
+    scale?: number;
+    scaleX?: number;
+    scaleY?: number;
+    translateX?: number;
+    translateY?: number;
+    [property: string]: string | number | boolean | undefined;
+  }
+
+  export interface UiChangeResult {
+    ok: boolean;
+    matched: number;
+    errors: string[];
+  }
+
+  export interface UiRedesign {
+    replace?: boolean;
+    resources?: Record<string, string>;
+    moves?: { id: string; target: UiTarget; into: UiTarget; index?: number }[];
+    rules?: { id: string; target: UiTarget; set: UiProperties }[];
+  }
+
   export interface RobloxAccountInfo {
     signedIn: boolean;
     userId?: number;
@@ -44,6 +108,7 @@ declare module 'voidstrap' {
     'game.leave': { input: GameInfo; result: unknown };
     'page.navigate': { input: { page: string }; result: unknown };
     'settings.changed': { input: { name: string; plugin: string }; result: unknown };
+    'ui.event': { input: { id: string; plugin: string; event: 'click'; name: string; type: string; text: string; window: string }; result: unknown };
     'ui.render': { input: { component: UiComponentKind; requestId: string; plugin: string; surface: Surface }; result: Node | null };
     'cursor.move': { input: CursorPosition; result: unknown };
     'cursor.down': { input: CursorPosition; result: unknown };
@@ -253,6 +318,22 @@ declare module 'voidstrap' {
   export interface Engine {
     log(text: unknown): void;
     mod: { readonly name: string; readonly version: string; options(): Record<string, Json> };
+    native: {
+      type(fullName: string): any;
+      ui<T>(fn: () => T): T;
+      find(target: UiTarget): any[];
+    };
+    files: {
+      read(path: string, encoding?: 'base64'): string;
+      write(path: string, content: string, encoding?: 'base64'): void;
+      makeFolder(path: string): void;
+      exists(path: string): boolean;
+      delete(path: string): void;
+      list(path?: string): { name: string; folder: boolean; size: number }[];
+    };
+    web: {
+      open(request: { url: string; title?: string; width?: number; height?: number }): { ok: boolean; reason: string };
+    };
     app: {
       readonly version: string;
       readonly platform: 'windows' | 'linux' | 'macos';
@@ -272,6 +353,20 @@ declare module 'voidstrap' {
       attach(request: { id: string; anchor: string; placement?: 'before' | 'after' | 'start' | 'end' }): { isPlaced: boolean; reason: string };
       detach(id: string): void;
       anchors(): Anchor[];
+      style(request: UiStylePreset | UiStyle): UiChangeResult;
+      windows(): { type: string; title: string; visible: boolean; active: boolean; width: number; height: number }[];
+      listen(request: { id: string; target: UiTarget }): UiChangeResult;
+      press(target: UiTarget): UiChangeResult;
+      tree(request?: { window?: string; root?: UiTarget; depth?: number; namedOnly?: boolean }): UiNode;
+      query(target: UiTarget): UiNode[];
+      rule(request: { id: string; target: UiTarget; set: UiProperties }): UiChangeResult;
+      move(request: { id: string; target: UiTarget; into: UiTarget; index?: number }): UiChangeResult;
+      resources(): { key: string; value: string }[];
+      setResources(values: Record<string, string>): UiChangeResult;
+      redesign(spec: UiRedesign): UiChangeResult;
+      undo(id: string): void;
+      reset(): void;
+      changes(): { suspended: boolean; rules: Json[]; moves: Json[]; resources: Record<string, string> };
       openDialog(request: string | { id: string; title?: string; width?: number; height?: number }): void;
       closeDialog(id: string): void;
       message(text: string, title?: string): void;

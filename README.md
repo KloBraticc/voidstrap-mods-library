@@ -122,6 +122,10 @@ How it stays safe:
 - **Rate limited.** At most 60 requests a minute per mod.
 - **The user approves it separately.** Voidstrap asks for Roblox account access on its own, also when an update adds the permission.
 - **Always reviewed.** Mods with this permission are labelled `roblox-account` and never merged automatically.
+
+### Extra power: native, files and web
+
+`native`, `files` and `web` under `permissions` are for mods that need more than the normal API. They are labelled `powerful-mod`, a person reads every version before it merges, and users approve the exact version again whenever it changes. `native` cannot be combined with `web` or `network` hosts, and none can be combined with `roblox-account`. Source may not contain login or password wording, `eval`, `Function`, `atob`, `fromCharCode` or escaped characters.
 - Code that mentions `ROBLOSECURITY`, cookies or `document.cookie` is refused outright.
 
 ## Rules

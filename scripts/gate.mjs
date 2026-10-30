@@ -135,6 +135,7 @@ for (const mod of mods) {
   const oldHosts = Array.isArray(baseManifest?.network) ? baseManifest.network : [];
   if (hosts.length) labels.add('network');
   if (Array.isArray(headManifest.permissions) && headManifest.permissions.includes('roblox-account')) { labels.add('roblox-account'); }
+  if (Array.isArray(headManifest.permissions) && headManifest.permissions.some(p => ['native', 'files', 'web'].includes(p))) { labels.add('powerful-mod'); }
   if (hosts.some(h => !ALLOWED_HOSTS.includes(h)) || (baseManifest && hosts.some(h => !oldHosts.includes(h)))) labels.add('needs-review');
 }
 
