@@ -8,7 +8,7 @@ const errors = [];
 const reviews = [];
 const only = process.argv.slice(2).filter(a => !a.startsWith('--'));
 const skipTypes = process.argv.includes('--no-types');
-const blocked = RULES.blocked.map(rule => ({ ...rule, regex: new RegExp(rule.pattern, 'i') }));
+const blocked = RULES.blocked.map(rule => ({ ...rule, regex: new RegExp(rule.pattern, rule.caseSensitive ? '' : 'i') }));
 const L = RULES.limits;
 const mediaExtensions = new Set(['.png', '.jpg', '.jpeg', '.gif', '.webp', '.bmp']);
 
@@ -49,6 +49,7 @@ function checkText(mod, file, isCode) {
     if (new RegExp(`[A-Za-z0-9+/=]{${L.maxEncodedRun},}`).test(line)) fail(mod, `${where} holds a long encoded blob. A very long run of letters and digits looks like hidden data. Keep data short and readable`);
     if (new RegExp(`(0x)?[0-9a-fA-F]{${L.maxEncodedRun},}`).test(line)) fail(mod, `${where} holds a long hex blob. A very long run of hex digits looks like hidden data. Keep data short and readable`);
     for (const rule of blocked) {
+      if (rule.codeOnly && !isCode) continue;
       if (!rule.regex.test(line)) continue;
       if (rule.level === 'review') review(mod, `${where} ${rule.reason}`);
       else fail(mod, `${where} ${rule.reason}`);
