@@ -129,7 +129,7 @@ Comment `retry` on your pull request to run failed checks and the review again w
 
 ### Extra power: native, files and web
 
-`native`, `files` and `web` under `permissions` are for mods that need more than the normal API. They are labelled `powerful-mod` and pass two AI security reviews. Voidstrap shows a Powerful mod badge and a warning that unlocks after 3 seconds, and users approve the exact version again whenever it changes. `native` cannot be combined with `web` or `network` hosts, and none can be combined with `roblox-account`. Source may not contain login or password wording, `eval`, `Function`, `atob`, `fromCharCode` or escaped characters.
+`native`, `files` and `web` under `permissions` are for mods that need more than the normal API. They are labelled `powerful-mod` and pass two AI security reviews. A person reads the first version of each new Powerful mod once. Voidstrap shows a Powerful mod badge and a warning that unlocks after 3 seconds, and users approve the exact version again whenever it changes. `native` cannot be combined with `web` or `network` hosts, and none can be combined with `roblox-account`. Source may not contain login or password wording, `eval`, `Function`, `atob`, `fromCharCode` or escaped characters.
 - Code that mentions `ROBLOSECURITY`, cookies or `document.cookie` is refused outright.
 
 ## Rules

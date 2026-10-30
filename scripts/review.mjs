@@ -436,6 +436,8 @@ async function runReview() {
 	  const permissions = Array.isArray(manifest.permissions) ? manifest.permissions : [];
 	  const powerful = permissions.some(p => ['native', 'files', 'web'].includes(p));
 	  const isMaintainer = pr.user.id === maintainerId;
+	  const heldFirstVersion = powerful && !isMaintainer && !baseFile;
+	  add(!heldFirstVersion, 'The first version of a Powerful mod is read by a person', heldFirstVersion ? `this is a new mod asking for native, files or web, so @${maintainerLogin} reads it once before it can merge. Later updates only need the automated checks` : '');
 	  let basePermissions = [];
 	  try { basePermissions = baseFile ? JSON.parse(Buffer.from(baseFile.content, 'base64').toString('utf8')).permissions ?? [] : []; } catch { basePermissions = []; }
 	  const addedPermissions = baseFile ? permissions.filter(p => !basePermissions.includes(p)) : [];
