@@ -457,6 +457,8 @@ async function runReview() {
 	  MARKER,
 	  '## Library requirements',
 	  '',
+	  '**Need to run the checks again?** Write a comment with only the word `retry` at any time, and every failed check and the review start over.',
+	  '',
 	  '| | What is checked | What it means and how to fix it |',
 	  '| --- | --- | --- |',
 	  ...requirements.map(r => `| ${r.ok ? '✅' : '❌'} | ${r.text} | ${r.detail.replace(/\|/g, '/')} |`),
@@ -465,7 +467,7 @@ async function runReview() {
 	  '',
 	  'Every row with ✅ is finished and good. Rows with ❌ are what stops the merge right now.',
 	  'To fix a row, follow the words in the last column, push your change, and the review starts again on its own. You do not need to close and reopen the pull request.',
-	  'To run everything again without changing your mod, write a comment with only the word retry. If a row stays ❌ and you do not know what to do, write a comment under this pull request and ask. Questions are always welcome, and the review will answer you.',
+	  'If a row stays ❌ and you do not know what to do, write a comment under this pull request and ask. Questions are always welcome, and the review will answer you.',
 	  ''
 	];
 	if (mod && !removing) {
@@ -525,7 +527,7 @@ try {
         '',
         'Something went wrong while the review was running. This is not a problem with your mod, and nothing is lost.',
         '',
-        'Write any comment on this pull request to start the review again. If it keeps stopping, the maintainer reads the mod and reviews it by hand.',
+        'Write a comment with only the word `retry` on this pull request to start the review again. If it keeps stopping, the maintainer reads the mod and reviews it by hand.',
         '',
         `The error was: ${String(error?.message ?? error).slice(0, 300)}`,
         '',
