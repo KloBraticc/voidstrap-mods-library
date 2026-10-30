@@ -42,6 +42,7 @@ jobs:
           MAINTAINER_ID: "195697851"
           MAINTAINER_LOGIN: KloBraticc
           MODERATION_FILE: ${{ runner.temp }}/moderation.json
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           AI_REVIEW_KEY: ${{ secrets.AI_REVIEW_KEY }}
           AI_REVIEW_URL: ${{ vars.AI_REVIEW_URL }}
           AI_REVIEW_MODEL: ${{ vars.AI_REVIEW_MODEL }}
