@@ -113,14 +113,14 @@ function checkMod(mod) {
     else for (const tag of manifest.tags) if (!TAGS.includes(tag)) fail(mod, `tag ${JSON.stringify(tag)} is not in tags.json`);
   }
   if (manifest.permissions !== undefined) {
-    const known = ['roblox-account', 'native', 'files', 'web'];
-    if (!Array.isArray(manifest.permissions) || manifest.permissions.some(p => !known.includes(p))) fail(mod, 'plugin.json permissions may only contain roblox-account, native, files or web');
+    const known = ['roblox-account', 'native', 'files', 'web', 'clipboard'];
+    if (!Array.isArray(manifest.permissions) || manifest.permissions.some(p => !known.includes(p))) fail(mod, 'plugin.json permissions may only contain roblox-account, native, files, web or clipboard');
     else {
       const has = p => manifest.permissions.includes(p);
-      const powerful = has('native') || has('files') || has('web');
+      const powerful = has('native') || has('files') || has('web') || has('clipboard');
       if (has('roblox-account')) review(mod, 'asks to use the Roblox account through $.roblox.request, the maintainer must review it');
       if (powerful) {
-        review(mod, 'asks for native, files or web access, users see a Powerful mod badge and a timed warning');
+        review(mod, 'asks for native, files, web or clipboard access, users see a Powerful mod badge and a timed warning');
         if (has('native') && (has('web') || hosts.length > 0)) fail(mod, 'native cannot be combined with web or network hosts, so what a mod reads cannot be sent out');
         if (has('roblox-account')) fail(mod, 'native, files and web cannot be combined with roblox-account');
         for (const file of files) {

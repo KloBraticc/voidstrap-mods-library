@@ -439,7 +439,7 @@ async function runReview() {
 	  const aiReady = requirements.every(r => r.ok) && flags.length === 0 && !pr.draft;
 	  const usesAccount = Array.isArray(manifest.permissions) && manifest.permissions.includes('roblox-account');
 	  const permissions = Array.isArray(manifest.permissions) ? manifest.permissions : [];
-	  const powerful = permissions.some(p => ['native', 'files', 'web'].includes(p));
+	  const powerful = permissions.some(p => ['native', 'files', 'web', 'clipboard'].includes(p));
 	  const isMaintainer = pr.user.id === maintainerId;
 	  const heldFirstVersion = powerful && !isMaintainer && !baseFile;
 	  add(!heldFirstVersion, 'The first version of a Powerful mod is read by a person', heldFirstVersion ? `this is a new mod asking for native, files or web, so @${maintainerLogin} reads it once before it can merge. Later updates only need the automated checks` : '');

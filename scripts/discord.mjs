@@ -58,7 +58,7 @@ export async function sendWebhook(webhookUrl, embed) {
         username: 'GitHub',
         avatar_url: 'https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png',
         embeds: [embed],
-        allowed_mentions: { parse: [] },
+        allowed_mentions: { parse: [], users: [], roles: [], replied_user: false },
       }),
       signal: AbortSignal.timeout(20000),
     });
