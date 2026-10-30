@@ -62,6 +62,13 @@ class MediaChecks(unittest.TestCase):
     def test_real_local_model_accepts_safe_control(self):
         media.ContentChecker()(Image.new("RGB", (384, 384), (128, 128, 128)))
 
+    def test_real_local_model_accepts_plain_brown_and_pixel_art(self):
+        checker = media.ContentChecker()
+        checker(Image.new("RGB", (384, 384), (134, 96, 67)))
+        art = Image.new("RGB", (16, 16), (134, 96, 67))
+        art.paste((92, 170, 60), (0, 0, 16, 5))
+        checker(art)
+
 
 if __name__ == "__main__":
     unittest.main()

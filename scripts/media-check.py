@@ -19,6 +19,7 @@ EXTENSIONS = {".png", ".jpg", ".jpeg", ".gif", ".webp", ".bmp", ".ico"}
 MAX_BYTES = 16 * 1024 * 1024
 MAX_PIXELS = 48 * 1024 * 1024 // 4
 MAX_FRAMES = 180
+REJECT_SCORE = 0.60
 Image.MAX_IMAGE_PIXELS = MAX_PIXELS
 warnings.simplefilter("error", Image.DecompressionBombWarning)
 
@@ -78,7 +79,7 @@ class ContentChecker:
                 raise ValueError("Content checker returned an invalid result")
             probabilities = np.exp(logits - logits.max())
             score = float(probabilities[0] / probabilities.sum())
-            if score >= 0.40:
+            if score >= REJECT_SCORE:
                 raise ValueError("Media rejected by local sexual content checking")
             if rgba.getextrema()[3] == (255, 255):
                 break
