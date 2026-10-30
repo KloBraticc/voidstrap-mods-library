@@ -441,8 +441,7 @@ async function runReview() {
 	  const permissions = Array.isArray(manifest.permissions) ? manifest.permissions : [];
 	  const powerful = permissions.some(p => ['native', 'files', 'web', 'clipboard'].includes(p));
 	  const isMaintainer = pr.user.id === maintainerId;
-	  const heldFirstVersion = powerful && !isMaintainer && !baseFile;
-	  add(!heldFirstVersion, 'The first version of a Powerful mod is read by a person', heldFirstVersion ? `this is a new mod asking for native, files or web, so @${maintainerLogin} reads it once before it can merge. Later updates only need the automated checks` : '');
+	  add(!powerful, 'Powerful mods are merged by the maintainer', powerful ? `this mod asks for native, files, web or clipboard, so every version waits for @${maintainerLogin} to read and merge it. The AI review below only advises and can never merge it` : '');
 	  let basePermissions = [];
 	  try { basePermissions = baseFile ? JSON.parse(Buffer.from(baseFile.content, 'base64').toString('utf8')).permissions ?? [] : []; } catch { basePermissions = []; }
 	  const addedPermissions = baseFile ? permissions.filter(p => !basePermissions.includes(p)) : [];
@@ -453,7 +452,7 @@ async function runReview() {
 	    if (second.verdict === 'safe' && Number.isInteger(second.safetyPercent)) ai = { ...ai, safetyPercent: Math.min(second.safetyPercent, ai.safetyPercent ?? 100) };
 	    if (second.verdict !== 'safe') ai = { ...second, safetyPercent: Math.min(second.safetyPercent ?? 100, ai.safetyPercent ?? 100), summary: `A second, stricter review did not agree. ${second.summary}` };
 	  }
-	  else ai = { verdict: 'unsure', summary: 'The AI review runs after every other requirement is met.', risks: [], suggestions: [], reply: '', language: ai.language };
+	  else if (!aiReady || !powerful) ai = { verdict: 'unsure', summary: 'The AI review runs after every other requirement is met.', risks: [], suggestions: [], reply: '', language: ai.language };
 	  const accountOk = !usesAccount || pr.user.id === maintainerId;
 	  add(accountOk, 'Does not ask for the Roblox account', usesAccount ? (accountOk ? 'the security review looked at the Roblox account access and found it read only and safe' : 'this mod asks to use your Roblox account (the roblox-account permission). A person must first check that it only reads what its description says, never buys or changes anything, and never sends your data anywhere else. The maintainer will look at it, and the AI review can also clear it when it finds nothing dangerous.') : '');
 	  add(flags.length === 0, 'Nothing flagged for a manual look', flags.length ? `a person needs to look at these lines first:<br>${flags.slice(0, 8).join('<br>')}` : '');

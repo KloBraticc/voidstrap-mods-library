@@ -119,9 +119,11 @@ function checkMod(mod) {
       const has = p => manifest.permissions.includes(p);
       const powerful = has('native') || has('files') || has('web') || has('clipboard');
       if (has('roblox-account')) review(mod, 'asks to use the Roblox account through $.roblox.request, the maintainer must review it');
+      if (has('roblox-account') && hosts.some(host => !ALLOWED_HOSTS.includes(host))) fail(mod, 'roblox-account can only be combined with hosts on allowed-hosts.json');
       if (powerful) {
         review(mod, 'asks for native, files, web or clipboard access, users see a Powerful mod badge and a timed warning');
         if (has('native') && (has('web') || hosts.length > 0)) fail(mod, 'native cannot be combined with web or network hosts, so what a mod reads cannot be sent out');
+        if (has('clipboard') && (has('web') || hosts.length > 0)) fail(mod, 'clipboard cannot be combined with web or network hosts, so what a mod reads cannot be sent out');
         if (has('roblox-account')) fail(mod, 'native, files and web cannot be combined with roblox-account');
         for (const file of files) {
           if (file.rel === 'owner.json' || !/\.(ts|tsx|js|jsx|mjs|json)$/i.test(file.rel)) continue;
