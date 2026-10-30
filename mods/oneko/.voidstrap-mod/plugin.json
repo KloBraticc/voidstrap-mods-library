@@ -1,0 +1,10 @@
+{
+  "name": "oneko",
+  "version": "0.1.0",
+  "description": "Oneko cursor companion with skins.",
+  "network": [],
+  "library": {
+    "id": "319643080/oneko",
+    "ownerId": 319643080
+  }
+}
