@@ -1,10 +1,10 @@
 import type { Engine } from 'voidstrap';
-import { SKIN_DATA_1 } from './skin-svg-data-1.ts';
-import { SKIN_DATA_2 } from './skin-svg-data-2.ts';
-import { SKIN_DATA_3 } from './skin-svg-data-3.ts';
-import { SKIN_DATA_4 } from './skin-svg-data-4.ts';
-import { SKIN_DATA_5 } from './skin-svg-data-5.ts';
-import { SKIN_DATA_6 } from './skin-svg-data-6.ts';
+import { SKIN_DATA_1 } from './skin-svg-data-1';
+import { SKIN_DATA_2 } from './skin-svg-data-2';
+import { SKIN_DATA_3 } from './skin-svg-data-3';
+import { SKIN_DATA_4 } from './skin-svg-data-4';
+import { SKIN_DATA_5 } from './skin-svg-data-5';
+import { SKIN_DATA_6 } from './skin-svg-data-6';
 
 type PixelRect = { x: number; y: number; width: number; height: number; background: string };
 type Pose = 'idle' | 'alert' | 'sleeping' | 'N' | 'NE' | 'E' | 'SE' | 'S' | 'SW' | 'W' | 'NW';

@@ -1,5 +1,5 @@
 import type { CursorPosition, Register } from 'voidstrap';
-import { getPixelFrameCount, getPixelRectsFromSvg } from './skin-vectors.ts';
+import { getPixelFrameCount, getPixelRectsFromSvg } from './skin-vectors';
 
 type Point = { x: number; y: number };
 type Pose = 'idle' | 'alert' | 'sleeping' | 'N' | 'NE' | 'E' | 'SE' | 'S' | 'SW' | 'W' | 'NW';
