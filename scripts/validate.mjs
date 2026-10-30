@@ -41,7 +41,7 @@ function checkIcon(mod, file) {
 function checkText(mod, file, isCode) {
   const text = fs.readFileSync(file.full, 'utf8');
   if (text.includes('\u0000')) fail(mod, `${file.rel} contains binary data. Text files must hold plain readable text only, so re-save the file as text or remove it`);
-  if (/[​-‏‪-‮⁦-⁩﻿]/.test(text)) fail(mod, `${file.rel} contains invisible or direction changing characters`);
+  if (/[\u200B\u202A-\u202E\u2066-\u2069]|(?!^)\uFEFF/.test(text)) fail(mod, `${file.rel} contains invisible or direction changing characters`);
   const lines = text.split(/\r?\n/);
   lines.forEach((line, i) => {
     const where = `${file.rel}:${i + 1}`;

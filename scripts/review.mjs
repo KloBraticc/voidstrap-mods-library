@@ -144,13 +144,13 @@ async function readModFiles(sha, mod) {
 
 function scanForReview(files) {
   const flags = [];
-  const rules = RULES.blocked.map(r => ({ ...r, regex: new RegExp(r.pattern, 'i') }));
+  const rules = RULES.blocked.map(r => ({ ...r, regex: new RegExp(r.pattern, r.caseSensitive ? '' : 'i') }));
   for (const file of files) {
     if (file.text == null) continue;
     file.text.split(/\r?\n/).forEach((line, i) => {
       for (const rule of rules) {
         if (rule.level === 'review' && rule.regex.test(line)) flags.push(`${file.path}:${i + 1} ${rule.reason}`);
-        else if (rule.level === 'error' && file.path.startsWith('comment by ') && rule.regex.test(line)) flags.push(`${file.path}:${i + 1} ${rule.reason}`);
+        else if (rule.level === 'error' && !rule.codeOnly && file.path.startsWith('comment by ') && rule.regex.test(line)) flags.push(`${file.path}:${i + 1} ${rule.reason}`);
       }
       if (INJECTION.test(line)) flags.push(`${file.path}:${i + 1} text that tries to instruct a reviewer`);
     });
