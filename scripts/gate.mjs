@@ -122,7 +122,8 @@ for (const mod of mods) {
     if (!removed && (!headOwner || headOwner.id !== baseOwner.id)) reasons.push(`the owner of \`${mod}\` cannot be changed in a pull request. Keep owner.json exactly as it was`);
   } else {
     labels.add('new-mod');
-    if (!headOwner || headOwner.id !== authorId) reasons.push(`new mod \`${mod}\` must have owner.json with your GitHub user id ${authorId}`);
+    if (isMaintainer && headOwner && Number.isSafeInteger(headOwner.id) && headOwner.id > 0) console.log(`The maintainer is publishing \`${mod}\` for @${headOwner.login}.`);
+    else if (!headOwner || headOwner.id !== authorId) reasons.push(`new mod \`${mod}\` must have owner.json with your GitHub user id ${authorId}`);
     else if (String(headOwner.login).toLowerCase() !== authorLogin.toLowerCase()) reasons.push(`owner.json login must be ${authorLogin}`);
   }
   if (removed) continue;
