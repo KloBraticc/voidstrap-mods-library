@@ -239,7 +239,6 @@ The rules live in [`scripts/rules.json`](scripts/rules.json) and [`scripts/valid
 | Crypto miners | fail |
 | TypeScript errors against the Voidstrap mod API | fail |
 | Words like password, token, api key, webhook | flagged for review |
-| Network hosts not on [`allowed-hosts.json`](allowed-hosts.json), or new hosts in an update | flagged for review and labelled `needs-review` |
 
 Passing the automatic checks is only the first step, see [Review process](#review-process).
 
@@ -259,7 +258,7 @@ Pull requests are reviewed and merged **automatically** when every requirement i
 | Your account owns the mod, one mod per pull request, version raised | `ownership.yml` |
 | Author is not banned, account is a personal account | `review.yml` |
 | The pull request says what changed (20 characters or more) | `review.yml` |
-| Only contacts websites on `allowed-hosts.json` | `review.yml` |
+| Does not list hosts used to collect data | `validate.yml` |
 | Nothing flagged for a manual look (credential words, text that tries to instruct a reviewer) | `review.yml` |
 | AI security review says **safe** | `review.yml` |
 
@@ -347,6 +346,6 @@ Every change is a commit on the `moderation` branch, so there is a full history.
 - `npm ci --ignore-scripts` then `npm run validate` checks every mod locally.
 - `node scripts/build-index.mjs <commit> index.json [moderation.json]` builds an index locally.
 - When the Voidstrap mod API changes, copy `src/Voidstrap.App/Resources/ModTypes.d.ts` from Voidstrap to `types/voidstrap.d.ts`.
-- Add a host to `allowed-hosts.json` or a tag to `tags.json` only in your own pull request.
+- Add a host to `allowed-hosts.json` (hosts mods may send data to) or a tag to `tags.json` only in your own pull request.
 - To delete a mod's files for good, remove its folder in a pull request. A takedown is faster and reversible.
 

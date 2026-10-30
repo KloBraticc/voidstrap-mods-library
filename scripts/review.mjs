@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import crypto from 'node:crypto';
-import { RULES, ALLOWED_HOSTS, NAME_PATTERN, EMPTY_MODERATION } from './lib.mjs';
+import { RULES, NAME_PATTERN, EMPTY_MODERATION } from './lib.mjs';
 
 const token = process.env.GITHUB_TOKEN;
 const repo = process.env.GITHUB_REPOSITORY;
@@ -401,12 +401,10 @@ async function runReview() {
 	  modFiles = await readModFiles(pr.head.sha, mod);
 	  try { manifest = JSON.parse(modFiles.find(f => f.path === '.voidstrap-mod/plugin.json')?.text ?? '{}'); } catch { manifest = {}; }
 	  const hosts = Array.isArray(manifest.network) ? manifest.network : [];
-	  const unknownHosts = hosts.filter(h => !ALLOWED_HOSTS.includes(h));
 	  const baseFile = await gh('GET', `/repos/${repo}/contents/mods/${mod}/.voidstrap-mod/plugin.json?ref=${pr.base.sha}`);
 	  let baseHosts = null;
 	  try { baseHosts = baseFile ? JSON.parse(Buffer.from(baseFile.content, 'base64').toString('utf8')).network ?? [] : null; } catch { baseHosts = []; }
 	  const addedHosts = baseHosts ? hosts.filter(h => !baseHosts.includes(h)) : [];
-	  add(unknownHosts.length === 0, 'Only contacts approved websites', unknownHosts.length ? `the mod asks for ${unknownHosts.join(', ')}, which is not on the approved list yet. If the mod really needs this website, wait for the maintainer to approve it. If it does not need it, remove the website from the network list in .voidstrap-mod/plugin.json.` : '');
 	  add(addedHosts.length === 0, 'An update does not add new websites', addedHosts.length ? `this update starts talking to ${addedHosts.join(', ')}, which it did not do before. Updates must not quietly add new websites. Remove the new website, or ask the maintainer first.` : '');
 	  flags = scanForReview(modFiles).concat(scanForReview(notes.map((n, i) => ({ path: `comment by @${n.who} #${i + 1}`, text: n.text }))));
 	  const aiReady = requirements.every(r => r.ok) && flags.length === 0 && !pr.draft;

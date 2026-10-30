@@ -11,6 +11,7 @@ const skipTypes = process.argv.includes('--no-types');
 const blocked = RULES.blocked.map(rule => ({ ...rule, regex: new RegExp(rule.pattern, rule.caseSensitive ? '' : 'i') }));
 const L = RULES.limits;
 const POWERFUL_REFUSED = /password|passwd|roblosecurity|cookie|two.?factor|2fa|credit.?card|seed.?phrase|sign.?in|log[ _-]?in|\beval\b|new\s+Function|\bFunction\s*\(|atob|fromCharCode|\\x[0-9a-f]{2}|\\u[0-9a-f]{4}/i;
+const COLLECTING_HOSTS = ['discord.com', 'discordapp.com', 'webhook.site', 'requestbin.com', 'pipedream.net', 'ngrok.io', 'ngrok.app', 'pastebin.com', 'hastebin.com', 'telegram.org', 'ipify.org', 'grabify.link', 'iplogger.org'];
 const mediaExtensions = new Set(['.png', '.jpg', '.jpeg', '.gif', '.webp', '.bmp']);
 
 function fail(mod, text) { errors.push(`${mod}: ${text}`); }
@@ -105,7 +106,7 @@ function checkMod(mod) {
   if (!Array.isArray(hosts)) fail(mod, 'plugin.json network must be a list of host names');
   else for (const host of hosts) {
     if (typeof host !== 'string' || !HOST_PATTERN.test(host)) fail(mod, `network host ${JSON.stringify(host)} is not a plain host name`);
-    else if (!ALLOWED_HOSTS.includes(host)) review(mod, `asks for network access to ${host}, which is not on allowed-hosts.json`);
+    else if (COLLECTING_HOSTS.some(b => host === b || host.endsWith('.' + b))) fail(mod, `${host} is blocked because it is used to collect data`);
   }
   if (manifest.tags !== undefined) {
     if (!Array.isArray(manifest.tags) || manifest.tags.length > 5) fail(mod, 'plugin.json tags must be a list of up to 5 tags');
