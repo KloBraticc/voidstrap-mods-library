@@ -9,7 +9,7 @@ This repository holds community Voidstrap mods. If you are an AI coding tool hel
 - Write readable TypeScript only. No minified, packed, encoded or obfuscated code, and no `eval`, `Function()` or computed `import()`.
 - Never touch Roblox cookies, passwords, tokens, or anything that cheats in or exploits Roblox games. These mods are refused and the account can be blocked.
 - List every host the mod fetches from in `.voidstrap-mod/plugin.json` `network`, and say what is sent in the description.
-- Only ask for `native`, `files` or `web` when the mod truly needs it, and say why in the description. These mods are always read by a person.
+- Only ask for `native`, `files` or `web` when the mod truly needs it, and say why in the description. These mods get two AI reviews, a Powerful mod badge and a timed warning.
 - Add up to 5 `tags` from `tags.json` to `plugin.json` so people can find the mod.
 - Run `manage_voidstrap_mods` with `action: "validate"` and `action: "test"` and fix every problem before publishing.
 
