@@ -17,6 +17,17 @@ const mediaExtensions = new Set(['.png', '.jpg', '.jpeg', '.gif', '.webp', '.bmp
 function fail(mod, text) { errors.push(`${mod}: ${text}`); }
 function review(mod, text) { reviews.push(`${mod}: ${text}`); }
 
+const unsafeSvg = /<\s*(script|foreignObject|iframe|embed|object|image|link|meta|base)\b|<!(DOCTYPE|ENTITY)|<\?|\son[a-z]+\s*=|javascript:|data:|@import|url\(\s*['"]?(?!#)|\b(xlink:)?href\s*=\s*['"](?!#)/i;
+const svgStringLine = /^\s*(?:export\s+default\s+|(?:export\s+)?(?:const|let|var)\s+[A-Za-z_$][\w$]*\s*=\s*|return\s+)?(["'`])((?:(?!\1)[^\\])*)\1\s*[;,]?\s*$/;
+
+function isSvgStringLine(line) {
+  if (line.length > L.maxFileBytes) return false;
+  const match = svgStringLine.exec(line);
+  if (!match) return false;
+  const body = match[2].trim().toLowerCase();
+  return body.startsWith('<svg') && body.endsWith('</svg>') && !body.includes('${') && !unsafeSvg.test(body);
+}
+
 function checkIcon(mod, file) {
   if (file.rel !== 'icon.ico') { fail(mod, `${file.rel} must be named icon.ico at the root of the mod`); return; }
   const bytes = fs.readFileSync(file.full);
@@ -47,7 +58,8 @@ function checkText(mod, file, isCode) {
   const lines = text.split(/\r?\n/);
   lines.forEach((line, i) => {
     const where = `${file.rel}:${i + 1}`;
-    if (isCode && line.length > L.maxLineLength) fail(mod, `${where} is longer than ${L.maxLineLength} characters. Lines this long usually mean minified or packed code, which is not accepted. Write normal readable code with short lines instead`);
+    if (isCode && line.length > L.maxLineLength && isSvgStringLine(line)) review(mod, `${where} holds an SVG as text, the image scanner cannot check it`);
+    else if (isCode && line.length > L.maxLineLength) fail(mod, `${where} is longer than ${L.maxLineLength} characters. Lines this long usually mean minified or packed code, which is not accepted. Write normal readable code with short lines instead`);
     if (new RegExp(`[A-Za-z0-9+/=]{${L.maxEncodedRun},}`).test(line)) fail(mod, `${where} holds a long encoded blob. A very long run of letters and digits looks like hidden data. Keep data short and readable`);
     if (new RegExp(`(0x)?[0-9a-fA-F]{${L.maxEncodedRun},}`).test(line)) fail(mod, `${where} holds a long hex blob. A very long run of hex digits looks like hidden data. Keep data short and readable`);
     for (const rule of blocked) {
@@ -88,6 +100,10 @@ function checkMod(mod) {
       continue;
     }
     if (file.size > L.maxFileBytes) fail(mod, `${file.rel} is larger than ${L.maxFileBytes} bytes`);
+    if (ext === '.svg') {
+      if (unsafeSvg.test(fs.readFileSync(file.full, 'utf8'))) fail(mod, `${file.rel} holds scripts, embedded content or outside links, only plain drawing shapes are allowed in an SVG`);
+      review(mod, `${file.rel} is an SVG, the image scanner cannot check it`);
+    }
     checkText(mod, file, RULES.codeExtensions.includes(ext));
   }
 
