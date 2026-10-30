@@ -182,7 +182,7 @@ mods/my-mod/
 - `name` must match the folder: lowercase letters, digits and hyphens.
 - `tags` is optional: up to 5 tags from [`tags.json`](tags.json).
 - `network` lists every host the mod fetches from. Leave it empty if it never goes online.
-- Only these file types are accepted: `.ts .tsx .js .mjs .jsx .json .md .ico .png .jpg .jpeg .gif .webp .bmp`.
+- Only these file types are accepted: `.ts .tsx .js .mjs .jsx .json .md .ico .png .jpg .jpeg .gif .webp .bmp .svg`. An SVG may only hold drawing shapes and goes to review.
 - Do not include `node_modules` or `.voidstrap-mod/types` (Voidstrap creates the types folder itself).
 
 The full mod API lives in [`types/voidstrap.d.ts`](types/voidstrap.d.ts). In Voidstrap, the mod editor and the MCP `guide` action explain it in detail.
@@ -229,13 +229,13 @@ The rules live in [`scripts/rules.json`](scripts/rules.json) and [`scripts/valid
 | Folder name, `plugin.json` schema, semantic version, description length | fail |
 | `owner.json` shape (numeric id and login only) | fail |
 | More than 64 files, more than 20 MB in total, text over 256 KB, media over 16 MB, nested more than 4 levels | fail |
-| File types other than `.ts .tsx .js .mjs .jsx .json .md .ico .png .jpg .jpeg .gif .webp .bmp`, symbolic links, hidden files, `node_modules` | fail |
+| File types other than `.ts .tsx .js .mjs .jsx .json .md .ico .png .jpg .jpeg .gif .webp .bmp .svg`, symbolic links, hidden files, `node_modules` | fail |
 | `.ico` without a valid icon header | fail |
 | Local sexual content checks reject a bundled image, animation frame, icon frame or declared sprite cell | fail |
 | Media cannot be decoded or checked, exceeds 48 MB decoded or has more than 180 frames or cells | fail |
 | `eval`, `Function()`, computed dynamic `import()` | fail |
 | `atob`, `btoa`, `unescape`, `decodeURIComponent`, `String.fromCharCode`, long escape sequences | fail |
-| Base64 or hex blobs of 200 or more characters, lines longer than 400 characters | fail |
+| Base64 or hex blobs of 200 or more characters, lines longer than 400 characters, except one plain SVG string on its own line | fail |
 | Invisible or text direction characters | fail |
 | Roblox cookies, Discord webhooks | fail |
 | Roblox executor functions and names, cheat terms, process memory and injection functions | fail |

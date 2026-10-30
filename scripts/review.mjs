@@ -408,6 +408,14 @@ async function runReview() {
 	const mods = [...new Set(files.flatMap(f => [f.filename, f.previous_filename]).filter(Boolean).filter(p => p.startsWith('mods/')).map(p => p.split('/')[1]))];
 	const mod = mods.length === 1 && NAME_PATTERN.test(mods[0]) ? mods[0] : null;
 	const removing = mod && files.every(f => f.status === 'removed');
+	if (mods.length === 0 && pr.user.id === maintainerId) {
+	  await upsertComment(pr, `${MARKER}
+## Library requirements
+
+This changes the library itself and no mods, so the mod review does not apply. @${maintainerLogin} merges it by hand.`);
+	  console.log('Maintainer change outside mods, nothing to review.');
+	  process.exit(0);
+	}
 
 	const requirements = [];
 	const add = (ok, text, detail = '') => requirements.push({ ok, text, detail });

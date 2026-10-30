@@ -24,7 +24,8 @@
     ".jpeg",
     ".gif",
     ".webp",
-    ".bmp"
+    ".bmp",
+    ".svg"
   ],
   "codeExtensions": [
     ".ts",
