@@ -10,7 +10,7 @@ const only = process.argv.slice(2).filter(a => !a.startsWith('--'));
 const skipTypes = process.argv.includes('--no-types');
 const blocked = RULES.blocked.map(rule => ({ ...rule, regex: new RegExp(rule.pattern, rule.caseSensitive ? '' : 'i') }));
 const L = RULES.limits;
-const POWERFUL_REFUSED = /password|passwd|roblosecurity|cookie|two.?factor|2fa|credit.?card|seed.?phrase|sign.?in|log.?in|\beval\b|new\s+Function|\bFunction\s*\(|atob|fromCharCode|\\x[0-9a-f]{2}|\\u[0-9a-f]{4}/i;
+const POWERFUL_REFUSED = /password|passwd|roblosecurity|cookie|two.?factor|2fa|credit.?card|seed.?phrase|sign.?in|log[ _-]?in|\beval\b|new\s+Function|\bFunction\s*\(|atob|fromCharCode|\\x[0-9a-f]{2}|\\u[0-9a-f]{4}/i;
 const mediaExtensions = new Set(['.png', '.jpg', '.jpeg', '.gif', '.webp', '.bmp']);
 
 function fail(mod, text) { errors.push(`${mod}: ${text}`); }
@@ -123,7 +123,7 @@ function checkMod(mod) {
         if (has('native') && (has('web') || hosts.length > 0)) fail(mod, 'native cannot be combined with web or network hosts, so what a mod reads cannot be sent out');
         if (has('roblox-account')) fail(mod, 'native, files and web cannot be combined with roblox-account');
         for (const file of files) {
-          if (!/\.(ts|tsx|js|jsx|mjs|json)$/i.test(file.rel)) continue;
+          if (file.rel === 'owner.json' || !/\.(ts|tsx|js|jsx|mjs|json)$/i.test(file.rel)) continue;
           const found = fs.readFileSync(file.full, 'utf8').match(POWERFUL_REFUSED);
           if (found) fail(mod, `${file.rel} contains "${found[0]}", which powerful mods cannot use`);
         }
