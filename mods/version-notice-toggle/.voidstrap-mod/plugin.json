@@ -1,0 +1,18 @@
+{
+  "name": "version-notice-toggle",
+  "version": "1.0.0",
+  "description": "Hide the stupid version notification.",
+  "network": [],
+  "userConfig": {
+    "showNotice": {
+      "title": "Show version notice",
+      "type": "boolean",
+      "default": false,
+      "description": "Turn this on to show the version notice in the top bar again."
+    }
+  },
+  "library": {
+    "id": "319643080/version-notice-toggle",
+    "ownerId": 319643080
+  }
+}
