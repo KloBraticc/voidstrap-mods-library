@@ -1,6 +1,10 @@
 {
   "name": "oneko",
+mod/oneko
   "version": "0.1.3",
+=======
+  "version": "0.1.3",
+main
   "description": "Oneko cursor companion with skins.",
   "network": [],
   "library": {

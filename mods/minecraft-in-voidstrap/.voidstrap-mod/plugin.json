@@ -1,0 +1,15 @@
+{
+  "name": "minecraft-in-voidstrap",
+  "version": "1.3.1",
+  "description": "Minecraft in Voidstrap: opens Eaglercraft 26 from happinessad.github.io in its own web window with popups blocked.",
+  "permissions": [
+    "web"
+  ],
+  "network": [
+    "happinessad.github.io"
+  ],
+  "library": {
+    "id": "195697851/minecraft-in-voidstrap",
+    "ownerId": 195697851
+  }
+}

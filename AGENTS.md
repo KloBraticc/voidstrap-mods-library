@@ -5,9 +5,11 @@ This repository holds community Voidstrap mods. If you are an AI coding tool hel
 ## Making a mod
 
 - Build the mod in the user's Voidstrap through the Voidstrap MCP server: call `manage_voidstrap_mods` with `action: "guide"` first, then `types`, and follow them.
+- A mod can own a full page behind its own button in Voidstrap's top left: call `$.modpages.add({ id, title, icon })` in `session.start` and draw it with an `on('ui.render', { component: 'Page', requestId: id })` hook. The button only shows while at least one loaded mod has a page. Use `$.sidebar.addPage` instead when the page belongs in the main sidebar.
 - Write readable TypeScript only. No minified, packed, encoded or obfuscated code, and no `eval`, `Function()` or computed `import()`.
 - Never touch Roblox cookies, passwords, tokens, or anything that cheats in or exploits Roblox games. These mods are refused and the account can be blocked.
 - List every host the mod fetches from in `.voidstrap-mod/plugin.json` `network`, and say what is sent in the description.
+- Only ask for `native`, `files`, `web` or `clipboard` when the mod truly needs it, and say why in the description. The maintainer must read and merge every version. These mods also get two AI reviews, a Powerful mod badge and a timed warning.
 - Add up to 5 `tags` from `tags.json` to `plugin.json` so people can find the mod.
 - Run `manage_voidstrap_mods` with `action: "validate"` and `action: "test"` and fix every problem before publishing.
 

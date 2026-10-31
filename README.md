@@ -122,6 +122,14 @@ How it stays safe:
 - **Rate limited.** At most 60 requests a minute per mod.
 - **The user approves it separately.** Voidstrap asks for Roblox account access on its own, also when an update adds the permission.
 - **Always reviewed.** Mods with this permission are labelled `roblox-account` and never merged automatically.
+
+### Run the checks again
+
+Comment `retry` on your pull request to run failed checks and the review again with the latest rules. Only the author and the maintainer can do this.
+
+### Extra power: native, files and web
+
+`native`, `files`, `web` and `clipboard` under `permissions` are for mods that need more than the normal API. They are labelled `powerful-mod` and get two AI security reviews, which only advise. The maintainer reads and merges every version of a Powerful mod, the bot can never merge one. Voidstrap shows a Powerful mod badge and a warning that unlocks after 3 seconds, and users approve the exact version again whenever it changes. `native` and `clipboard` cannot be combined with `web` or `network` hosts, and none can be combined with `roblox-account`. `roblox-account` only works with hosts on `allowed-hosts.json`. Source may not contain login or password wording, `eval`, `Function`, `atob`, `fromCharCode` or escaped characters.
 - Code that mentions `ROBLOSECURITY`, cookies or `document.cookie` is refused outright.
 
 ## Rules
@@ -140,7 +148,7 @@ A mod is **removed or refused** if it:
 Other requirements:
 
 - One mod per pull request.
-- Readable source only. Keep it small: at most 64 files and 1 MB.
+- Readable source only. Keep it small: at most 64 files and 20 MB, with text files limited to 256 KB and bundled media to 16 MB.
 - Describe honestly what the mod does.
 
 By publishing here you allow the mod to be redistributed through this library and Voidstrap. You keep the rights to your work.
@@ -174,7 +182,7 @@ mods/my-mod/
 - `name` must match the folder: lowercase letters, digits and hyphens.
 - `tags` is optional: up to 5 tags from [`tags.json`](tags.json).
 - `network` lists every host the mod fetches from. Leave it empty if it never goes online.
-- Only these file types are accepted: `.ts .tsx .js .mjs .jsx .json .md .ico`.
+- Only these file types are accepted: `.ts .tsx .js .mjs .jsx .json .md .ico .png .jpg .jpeg .gif .webp .bmp .svg`. An SVG may only hold drawing shapes and goes to review.
 - Do not include `node_modules` or `.voidstrap-mod/types` (Voidstrap creates the types folder itself).
 
 The full mod API lives in [`types/voidstrap.d.ts`](types/voidstrap.d.ts). In Voidstrap, the mod editor and the MCP `guide` action explain it in detail.
@@ -220,12 +228,14 @@ The rules live in [`scripts/rules.json`](scripts/rules.json) and [`scripts/valid
 | --- | --- |
 | Folder name, `plugin.json` schema, semantic version, description length | fail |
 | `owner.json` shape (numeric id and login only) | fail |
-| More than 64 files, more than 1 MB in total, any file over 256 KB, nested more than 4 levels | fail |
-| File types other than `.ts .tsx .js .mjs .jsx .json .md .ico`, symbolic links, hidden files, `node_modules` | fail |
+| More than 64 files, more than 20 MB in total, text over 256 KB, media over 16 MB, nested more than 4 levels | fail |
+| File types other than `.ts .tsx .js .mjs .jsx .json .md .ico .png .jpg .jpeg .gif .webp .bmp .svg`, symbolic links, hidden files, `node_modules` | fail |
 | `.ico` without a valid icon header | fail |
+| Local sexual content checks reject a bundled image, animation frame, icon frame or declared sprite cell | fail |
+| Media cannot be decoded or checked, exceeds 48 MB decoded or has more than 180 frames or cells | fail |
 | `eval`, `Function()`, computed dynamic `import()` | fail |
 | `atob`, `btoa`, `unescape`, `decodeURIComponent`, `String.fromCharCode`, long escape sequences | fail |
-| Base64 or hex blobs of 200 or more characters, lines longer than 400 characters | fail |
+| Base64 or hex blobs of 200 or more characters, lines longer than 400 characters, except one plain SVG string on its own line | fail |
 | Invisible or text direction characters | fail |
 | Roblox cookies, Discord webhooks | fail |
 | Roblox executor functions and names, cheat terms, process memory and injection functions | fail |
@@ -233,9 +243,14 @@ The rules live in [`scripts/rules.json`](scripts/rules.json) and [`scripts/valid
 | Crypto miners | fail |
 | TypeScript errors against the Voidstrap mod API | fail |
 | Words like password, token, api key, webhook | flagged for review |
-| Network hosts not on [`allowed-hosts.json`](allowed-hosts.json), or new hosts in an update | flagged for review and labelled `needs-review` |
 
 Passing the automatic checks is only the first step, see [Review process](#review-process).
+
+Bundled images, animated GIFs and sprite sheets are allowed after local checking. Install Python 3.11 or newer and run `python -m pip install -r scripts/media-requirements.txt` before `npm run validate`. The checker downloads a fixed model and license files once, verifies their checksums, then runs on the checking machine. Media is never sent to a hosted content service, including icons. Both validation and index publication require a successful media scan. Existing text and code review still applies.
+
+Use `Image` for images or GIFs. Use `Sprite` with `frameWidth` and `frameHeight` in source pixels for a sprite sheet. Add a root `media.json` with `{"spriteSheets":{"assets/cat.png":{"frameWidth":32,"frameHeight":32}}}` so library checks examine each cell separately. Every animation frame is checked before acceptance. Large images are also checked in smaller regions. Inline encoded blobs and unmoderated external embeds remain restricted.
+
+The visual classifier targets sexual imagery. It can miss unsafe content or reject safe content and does not classify every form of violence, hate or other harmful imagery. Reports, review and takedowns remain necessary.
 
 ## Review process
 
@@ -247,7 +262,7 @@ Pull requests are reviewed and merged **automatically** when every requirement i
 | Your account owns the mod, one mod per pull request, version raised | `ownership.yml` |
 | Author is not banned, account is a personal account | `review.yml` |
 | The pull request says what changed (20 characters or more) | `review.yml` |
-| Only contacts websites on `allowed-hosts.json` | `review.yml` |
+| Does not list hosts used to collect data | `validate.yml` |
 | Nothing flagged for a manual look (credential words, text that tries to instruct a reviewer) | `review.yml` |
 | AI security review says **safe** | `review.yml` |
 
@@ -335,6 +350,6 @@ Every change is a commit on the `moderation` branch, so there is a full history.
 - `npm ci --ignore-scripts` then `npm run validate` checks every mod locally.
 - `node scripts/build-index.mjs <commit> index.json [moderation.json]` builds an index locally.
 - When the Voidstrap mod API changes, copy `src/Voidstrap.App/Resources/ModTypes.d.ts` from Voidstrap to `types/voidstrap.d.ts`.
-- Add a host to `allowed-hosts.json` or a tag to `tags.json` only in your own pull request.
+- Add a host to `allowed-hosts.json` (hosts mods may send data to) or a tag to `tags.json` only in your own pull request.
 - To delete a mod's files for good, remove its folder in a pull request. A takedown is faster and reversible.
 

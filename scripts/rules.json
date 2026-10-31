@@ -1,9 +1,10 @@
 {
   "limits": {
-    "maxModBytes": 1048576,
+    "maxModBytes": 20971520,
     "maxFiles": 64,
     "maxFileBytes": 262144,
     "maxIconBytes": 262144,
+    "maxMediaBytes": 16777216,
     "maxPathDepth": 4,
     "maxLineLength": 400,
     "maxDescription": 300,
@@ -17,7 +18,14 @@
     ".jsx",
     ".json",
     ".md",
-    ".ico"
+    ".ico",
+    ".png",
+    ".jpg",
+    ".jpeg",
+    ".gif",
+    ".webp",
+    ".bmp",
+    ".svg"
   ],
   "codeExtensions": [
     ".ts",
@@ -35,6 +43,7 @@
     {
       "pattern": "\\bnew\\s+Function\\s*\\(|(?<![.\\w])Function\\s*\\(",
       "reason": "Function() builds code from text",
+      "caseSensitive": true,
       "level": "error"
     },
     {
@@ -43,7 +52,7 @@
       "level": "error"
     },
     {
-      "pattern": "\\b(atob|btoa|unescape|decodeURIComponent)\\s*\\(",
+      "pattern": "\\b(atob|btoa|unescape)\\s*\\(",
       "reason": "decoding helpers are used to hide payloads",
       "level": "error"
     },
@@ -70,7 +79,8 @@
     {
       "pattern": "discord(app)?\\.com/api/webhooks",
       "reason": "Discord webhooks are a common way to steal data",
-      "level": "error"
+      "level": "error",
+      "binary": false
     },
     {
       "pattern": "\\b(getgenv|getrenv|getreg|hookfunction|hookmetamethod|newcclosure|setreadonly|getrawmetatable|loadstring|firetouchinterest|fireclickdetector|syn\\.request|identifyexecutor)\\b",
@@ -78,7 +88,7 @@
       "level": "error"
     },
     {
-      "pattern": "\\b(synapse|krnl|fluxus|electron executor|script-?ware|delta executor|wave executor|solara|xeno executor|codex executor|arceus)\\b",
+      "pattern": "\\b(synapse[ -]?x|krnl|fluxus|electron executor|script-?ware|delta executor|wave executor|solara executor|xeno executor|codex executor|arceus ?x)\\b",
       "reason": "Roblox executors and cheats are banned",
       "level": "error"
     },
@@ -95,7 +105,9 @@
     {
       "pattern": "\\b(child_process|require\\s*\\(|process\\.env|__dirname|XMLHttpRequest|WebSocket|importScripts)\\b",
       "reason": "Node and browser escape hatches are not part of the Voidstrap mod API",
-      "level": "error"
+      "codeOnly": true,
+      "level": "error",
+      "binary": false
     },
     {
       "pattern": "\\b(crypto ?miner|coinhive|xmrig|monero)\\b",
@@ -135,7 +147,8 @@
     {
       "pattern": "!\\[[^\\]]*\\]\\(https?://|data:(image|video|audio)/|\\b(imgur\\.com|i\\.imgur\\.com|tenor\\.com|media\\.tenor\\.com|giphy\\.com|media\\.giphy\\.com|catbox\\.moe|files\\.catbox\\.moe|ibb\\.co|i\\.ibb\\.co|postimages\\.org|prnt\\.sc|gyazo\\.com|puu\\.sh|streamable\\.com|imgflip\\.com|9gag\\.com|knowyourmeme\\.com|cdn\\.discordapp\\.com|media\\.discordapp\\.net)\\b|https?://[^\\s\"'<>)]+\\.(gif|webp|apng|mp4|webm|mov|avi|mkv)(\\b|[?#])",
       "reason": "external image, GIF and video embeds or unmoderated media hosts are banned",
-      "level": "error"
+      "level": "error",
+      "binary": false
     }
   ]
 }

@@ -51,6 +51,12 @@ async function reject(reasons) {
   process.exit(1);
 }
 
+function nextVersion(version) {
+  const parts = version.split('.').map(Number);
+  parts[2] += 1;
+  return parts.join('.');
+}
+
 const authorId = pr.user.id;
 const authorLogin = pr.user.login;
 const isMaintainer = authorId === maintainerId;
@@ -61,7 +67,7 @@ const reasons = [];
 const mods = new Set();
 
 const moderation = await readJsonAt('moderation.json', 'moderation');
-if (moderation && Array.isArray(moderation.banned) && moderation.banned.some(b => b.id === authorId)) reasons.push('this account is banned from publishing to the library');
+if (moderation && Array.isArray(moderation.banned) && moderation.banned.some(b => b.id === authorId)) reasons.push('this account is banned from publishing to the library. If you believe this is a mistake, open an issue and explain');
 const MIN_ACCOUNT_DAYS = 14;
 const maintainerLogin = (process.env.MAINTAINER_LOGIN ?? '').toLowerCase();
 const skeleton = text => text.toLowerCase().replace(/[il1|]/g, 'l').replace(/[o0]/g, 'o').replace(/[s5]/g, 's').replace(/[e3]/g, 'e').replace(/[a4@]/g, 'a').replace(/rn/g, 'm').replace(/vv/g, 'w').replace(/[-_.]/g, '');
@@ -77,7 +83,7 @@ if (!isMaintainer) {
     if (batch.length < 100) break;
   }
   const foreign = commits.filter(c => c.author?.id !== authorId && c.committer?.id !== authorId);
-  if (foreign.length) reasons.push(`${foreign.length} commit(s) in this pull request were not made by @${authorLogin}, every commit must come from the account that opens the pull request`);
+  if (foreign.length) reasons.push(`${foreign.length} commit(s) in this pull request were not made by @${authorLogin}. Every commit must come from the account that opens the pull request. Make the commits again with your own account and push them`);
 }
 for (const file of files) {
   if (!file.filename.endsWith('/owner.json') || file.status === 'removed') continue;
@@ -91,7 +97,7 @@ for (const file of files) {
   for (const p of paths) {
     const parts = p.split('/');
     if (parts[0] !== 'mods' || parts.length < 3) {
-      if (!isMaintainer) reasons.push(`\`${p}\` is outside a mod folder, only the maintainer can change it`);
+      if (!isMaintainer) reasons.push(`\`${p}\` is outside a mod folder. Only the maintainer can change files outside of mods/. Move your changes into your own mod folder`);
       continue;
     }
     if (!NAME_PATTERN.test(parts[1])) reasons.push(`\`${parts[1]}\` is not a valid mod name`);
@@ -99,7 +105,7 @@ for (const file of files) {
   }
 }
 
-if (!isMaintainer && mods.size > 1) reasons.push(`this pull request changes ${mods.size} mods (${[...mods].join(', ')}), publish each mod in its own pull request`);
+if (!isMaintainer && mods.size > 1) reasons.push(`this pull request changes ${mods.size} mods (${[...mods].join(', ')}). Every pull request may change exactly one mod. Close this one and open one pull request per mod instead`);
 
 const labels = new Set();
 for (const mod of mods) {
@@ -113,22 +119,24 @@ for (const mod of mods) {
       reasons.push(`\`${mod}\` belongs to GitHub user id ${baseOwner.id} (@${baseOwner.login}), you are id ${authorId} (@${authorLogin})`);
       continue;
     }
-    if (!removed && (!headOwner || headOwner.id !== baseOwner.id)) reasons.push(`the owner of \`${mod}\` cannot be changed in a pull request`);
+    if (!removed && (!headOwner || headOwner.id !== baseOwner.id)) reasons.push(`the owner of \`${mod}\` cannot be changed in a pull request. Keep owner.json exactly as it was`);
   } else {
     labels.add('new-mod');
-    if (!headOwner || headOwner.id !== authorId) reasons.push(`new mod \`${mod}\` must have owner.json with your GitHub user id ${authorId}`);
+    if (isMaintainer && headOwner && Number.isSafeInteger(headOwner.id) && headOwner.id > 0) console.log(`The maintainer is publishing \`${mod}\` for @${headOwner.login}.`);
+    else if (!headOwner || headOwner.id !== authorId) reasons.push(`new mod \`${mod}\` must have owner.json with your GitHub user id ${authorId}`);
     else if (String(headOwner.login).toLowerCase() !== authorLogin.toLowerCase()) reasons.push(`owner.json login must be ${authorLogin}`);
   }
   if (removed) continue;
   const baseManifest = await readJsonAt(`mods/${mod}/.voidstrap-mod/plugin.json`, baseRef);
   const headManifest = await readJsonAt(`mods/${mod}/.voidstrap-mod/plugin.json`, headRef);
-  if (!headManifest) { reasons.push(`\`${mod}\` has no readable .voidstrap-mod/plugin.json`); continue; }
+  if (!headManifest) { reasons.push(`\`${mod}\` has no readable .voidstrap-mod/plugin.json. The file must exist at mods/${mod}/.voidstrap-mod/plugin.json and hold valid JSON`); continue; }
   if (baseManifest && SEMVER.test(String(baseManifest.version)) && SEMVER.test(String(headManifest.version)) && compareVersions(headManifest.version, baseManifest.version) <= 0)
-    reasons.push(`\`${mod}\` version must go up, it is ${baseManifest.version} and the pull request has ${headManifest.version}`);
+    reasons.push(`\`${mod}\` version must go up, it is ${baseManifest.version} on the library and your pull request still has ${headManifest.version}. Open mods/${mod}/.voidstrap-mod/plugin.json and make the version number larger, for example ${SEMVER.test(String(baseManifest.version)) ? nextVersion(baseManifest.version) : '0.0.1 higher than now'}`);
   const hosts = Array.isArray(headManifest.network) ? headManifest.network : [];
   const oldHosts = Array.isArray(baseManifest?.network) ? baseManifest.network : [];
   if (hosts.length) labels.add('network');
   if (Array.isArray(headManifest.permissions) && headManifest.permissions.includes('roblox-account')) { labels.add('roblox-account'); }
+  if (Array.isArray(headManifest.permissions) && headManifest.permissions.some(p => ['native', 'files', 'web', 'clipboard'].includes(p))) { labels.add('powerful-mod'); }
   if (hosts.some(h => !ALLOWED_HOSTS.includes(h)) || (baseManifest && hosts.some(h => !oldHosts.includes(h)))) labels.add('needs-review');
 }
 

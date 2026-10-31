@@ -39,7 +39,7 @@ for (const name of listMods()) {
     description: manifest.description,
     tags: Array.isArray(manifest.tags) ? manifest.tags : [],
     network: Array.isArray(manifest.network) ? manifest.network : [],
-    permissions: Array.isArray(manifest.permissions) ? manifest.permissions.filter(p => p === 'roblox-account') : [],
+    permissions: Array.isArray(manifest.permissions) ? manifest.permissions.filter(p => ['roblox-account', 'native', 'files', 'web', 'clipboard'].includes(p)) : [],
     icon: files.some(f => f.path === 'icon.ico') ? 'icon.ico' : null,
     created: dates.at(-1) ?? null,
     updated: dates[0] ?? null,

@@ -1,0 +1,11 @@
+{
+  "name": "hide-launch-button",
+  "version": "1.0.0",
+  "description": "Completely hides the Save and Launch button in the footer.",
+  "network": [],
+  "userConfig": {},
+  "library": {
+    "id": "195697851/hide-launch-button",
+    "ownerId": 195697851
+  }
+}

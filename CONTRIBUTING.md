@@ -10,6 +10,8 @@ Thanks for sharing your Voidstrap mod. The easiest way is the **Publish** button
 - [ ] For an update, `version` is higher than the published one and `owner.json` is unchanged.
 - [ ] Every host the mod contacts is listed in `network`, and the description says what is sent.
 - [ ] `npm run validate -- <your-mod-name>` passes.
+- [ ] Python dependencies from `scripts/media-requirements.txt` are installed for local media checking.
+- [ ] Sprite sheets declare cell dimensions in `media.json`; every bundled image and animation passes local checking.
 - [ ] The code is readable, not minified, packed or obfuscated.
 
 ## Ownership

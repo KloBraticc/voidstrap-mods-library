@@ -209,6 +209,11 @@ function handlePointer(
   }));
 }
 
+function savePreferences($: import('voidstrap').Engine, next: Preferences): void {
+  update($, preferences, () => next);
+  $.store.set(PREFS_KEY, next);
+}
+
 function loadPreferences($: import('voidstrap').Engine): void {
   const currentPrefs = $.store.get(PREFS_KEY);
   const legacyPrefs = $.store.get(LEGACY_PREFS_KEY);
@@ -232,39 +237,24 @@ function loadPreferences($: import('voidstrap').Engine): void {
   update($, preferences, () => ({ speed, animationFps, idleRange, skin }));
 }
 
+function applySkin($: import('voidstrap').Engine, rawSkinName: string): void {
+  const skinName = rawSkinName.trim().toLowerCase();
+  if (!SKIN_IDS.includes(skinName as SkinId)) {
+    $.ui.toast('Oneko', 'Choose one of the skins in the list.');
+    return;
+  }
 
-function savePreferences($: import('voidstrap').Engine, next: Preferences): void {
-  $.state.set(preferences.ref, next);
-  $.store.set(PREFS_KEY, next);
-  $.ui.refresh();
-}
-
-function applySkin($: import('voidstrap').Engine, skinId: SkinId): void {
-  if (!SKIN_IDS.includes(skinId)) return;
   const current = read($, preferences);
-  if (current.skin === skinId) return;
-  const next: Preferences = { ...current, skin: skinId };
+  const next: Preferences = { ...current, skin: skinName as SkinId };
   savePreferences($, next);
-}
-
-function startFollowTimer($: import('voidstrap').Engine): void {
-  if (followTimerId !== undefined) return;
-  followTimerId = $.clock.every(FOLLOW_INTERVAL_MS, () => {
-    if (settingsPageActive) return;
-    const latestPointer = $.cursor.get();
-    pointerInsideWindow = latestPointer.insideWindow;
-    if (latestPointer.insideWindow) handlePointer($, latestPointer, 'idle');
-  });
 }
 
 export const register: Register = (on) => {
   on('session.start', ($, e, next) => {
     loadPreferences($);
     settingsPageActive = isOnekoSettingsPage($.nav.current());
-    if (!settingsPageActive) {
-      const overlay = $.ui.attach({ id: OVERLAY, anchor: 'WindowRoot', placement: 'end' });
-      if (!overlay.isPlaced) $.log('Oneko overlay attach failed: ' + overlay.reason);
-    }
+    const overlay = $.ui.attach({ id: OVERLAY, anchor: 'WindowRoot', placement: 'end' });
+    if (!overlay.isPlaced) $.log('Oneko overlay attach failed: ' + overlay.reason);
     $.modpages.add({ id: SETTINGS_PAGE, title: 'Oneko', icon: 'Settings24' });
     const pointer = $.cursor.get();
     pointerInsideWindow = pointer.insideWindow;
@@ -272,7 +262,12 @@ export const register: Register = (on) => {
     cancelIdleKickTimer($);
     cancelClickAnimationTimer($);
     cancelFollowTimer($);
-    if (!settingsPageActive) startFollowTimer($);
+    followTimerId = $.clock.every(FOLLOW_INTERVAL_MS, () => {
+      if (settingsPageActive) return;
+      const latestPointer = $.cursor.get();
+      pointerInsideWindow = latestPointer.insideWindow;
+      if (latestPointer.insideWindow) handlePointer($, latestPointer, 'idle');
+    });
     return next(e);
   });
 
@@ -288,18 +283,11 @@ export const register: Register = (on) => {
   });
 
   on('page.navigate', ($, e, next) => {
-    const wasSettingsPageActive = settingsPageActive;
     settingsPageActive = isOnekoSettingsPage(e.page);
     if (settingsPageActive) {
-      cancelFollowTimer($);
-      $.ui.detach(OVERLAY);
       cancelIdleKickTimer($);
       cancelClickAnimationTimer($);
       update($, scene, state => ({ ...state, clicking: false }));
-    } else if (wasSettingsPageActive) {
-      const overlay = $.ui.attach({ id: OVERLAY, anchor: 'WindowRoot', placement: 'end' });
-      if (!overlay.isPlaced) $.log('Oneko overlay attach failed: ' + overlay.reason);
-      startFollowTimer($);
     }
     return next(e);
   });
@@ -342,7 +330,6 @@ export const register: Register = (on) => {
     const state = read($, scene);
     const currentPrefs = read($, preferences);
     const visible = state.visible && pointerInsideWindow && !settingsPageActive;
-    if (!visible) return <Canvas hitTestVisible={false} />;
     // A nearby left click briefly shows the tail-up pose while Oneko is idle.
     const renderPose: Pose = state.clicking && state.pose === 'idle' ? 'alert' : state.pose;
     const rects = getPixelRectsFromSvg($, currentPrefs.skin, renderPose, state.frame);
@@ -360,25 +347,10 @@ export const register: Register = (on) => {
   });
 
   on('ui.render', { component: 'Page', requestId: SETTINGS_PAGE }, ($) => {
-    const { Box, Text, Button, Badge, Canvas } = $.ui.resolve();
+    const { Box, Text, Button, Badge, Canvas, Wrap } = $.ui.resolve();
     const current = read($, preferences);
     const selectedLabel = SKIN_LABELS[current.skin];
     const previewRects = getPixelRectsFromSvg($, current.skin, 'idle', 0);
-    const skinButton = (skinId: SkinId) => {
-      const selected = current.skin === skinId;
-      const label = SKIN_LABELS[skinId];
-      return (
-        <Button key={"oneko-skin-" + skinId}
-          hitTestVisible={true} width={152} height={44}
-          label={selected ? "✓  " + label : label}
-          variant={selected ? "primary" : "secondary"}
-          background={selected ? "#FFFFD629" : "#FF655513"}
-          foreground={selected ? "#FF211A04" : "#FFFFF5D8"}
-          borderBrush={selected ? "#FFFFD629" : "#FF8C771A"}
-          borderThickness={1} cornerRadius={8}
-          onPress={() => applySkin($, skinId)} />
-      );
-    };
     return (
       <Box direction="column" gap={20} padding={24} horizontalAlignment="stretch">
         <Box direction="column" gap={5}>
@@ -388,22 +360,20 @@ export const register: Register = (on) => {
         </Box>
         <Box direction="row" gap={16} padding={20} align="center" horizontalAlignment="stretch"
           background="#FF352F1B" borderBrush="#FF887621" borderThickness={1} cornerRadius={10}>
-          <Canvas key={"oneko-preview-" + current.skin}
-            width={84} height={84} padding={0}
-            background="#FF292515" borderBrush="#FF8C771A"
-            borderThickness={1} cornerRadius={10} hitTestVisible={false}>
+          <Canvas key="oneko-vector-preview" width={80} height={80} margin={8}
+            background="#FF272416" borderBrush="#FF756315" borderThickness={1}
+            cornerRadius={8} hitTestVisible={false}>
             {previewRects.map((rect, index) => (
-              <Box key={"oneko-preview-pixel-" + index}
-                left={10 + rect.x * 2} top={10 + rect.y * 2}
+              <Box key={'oneko-preview-vector-' + index}
+                left={8 + rect.x * 2} top={8 + rect.y * 2}
                 width={rect.width * 2} height={rect.height * 2}
                 background={rect.background} hitTestVisible={false} />
             ))}
           </Canvas>
           <Box direction="column" gap={5} margin={8} horizontalAlignment="left">
-            <Text text="LIVE SKIN PREVIEW" size={11} bold={true} dim={true} />
-            <Text text={selectedLabel} size={18} bold={true} />
-            <Text text="Preview updates when you select a skin below."
-              size={13} dim={true} wrap={true} />
+            <Text text="CURRENT SKIN" size={11} bold={true} dim={true} />
+            <Text text={selectedLabel} size={22} bold={true} />
+            <Text text="Changes apply instantly." size={13} dim={true} wrap={true} />
           </Box>
         </Box>
         <Box direction="column" gap={14} padding={20} horizontalAlignment="stretch"
@@ -412,22 +382,25 @@ export const register: Register = (on) => {
             <Text text="Available skins" size={18} bold={true} />
             <Badge key="oneko-skin-count" text={SKIN_IDS.length + " skins"} variant="neutral" />
           </Box>
-          <Text text="Click a skin to apply it immediately. Your current choice is highlighted."
+          <Text text="Click a button to switch skins. Your current choice is highlighted."
             size={13} margin={12} dim={true} wrap={true} />
-          <Box direction="column" gap={12} horizontalAlignment="left">
-            <Box key="oneko-skin-row-0" direction="row" gap={12} horizontalAlignment="left">
-              {skinButton("ace")}{skinButton("black")}{skinButton("bunny")}{skinButton("calico")}
-              {skinButton("default")}{skinButton("eevee")}{skinButton("esmeralda")}{skinButton("fox")}
-            </Box>
-            <Box key="oneko-skin-row-1" direction="row" gap={12} horizontalAlignment="left">
-              {skinButton("ghost")}{skinButton("gray")}{skinButton("jess")}{skinButton("kina")}
-              {skinButton("lucy")}{skinButton("maia")}{skinButton("maria")}{skinButton("mike")}
-            </Box>
-            <Box key="oneko-skin-row-2" direction="row" gap={12} horizontalAlignment="left">
-              {skinButton("silver")}{skinButton("silversky")}{skinButton("snuupy")}
-              {skinButton("spirit")}{skinButton("tora")}{skinButton("valentine")}
-            </Box>
-          </Box>
+          <Wrap itemWidth={166} itemHeight={58} horizontalAlignment="left">
+            {SKIN_IDS.map(skinId => {
+              const selected = current.skin === skinId;
+              const label = SKIN_LABELS[skinId];
+              return (
+                <Button key={"oneko-skin-" + skinId} margin={7}
+                  hitTestVisible={true} width={152} height={44}
+                  label={selected ? "✓  " + label : label}
+                  variant={selected ? "primary" : "secondary"}
+                  background={selected ? "#FFFFD629" : "#FF655513"}
+                  foreground={selected ? "#FF211A04" : "#FFFFF5D8"}
+                  borderBrush={selected ? "#FFFFD629" : "#FF8C771A"}
+                  borderThickness={1} cornerRadius={8}
+                  onPress={() => applySkin($, skinId)} />
+              );
+            })}
+          </Wrap>
         </Box>
       </Box>
     );

@@ -8,11 +8,25 @@ const errors = [];
 const reviews = [];
 const only = process.argv.slice(2).filter(a => !a.startsWith('--'));
 const skipTypes = process.argv.includes('--no-types');
-const blocked = RULES.blocked.map(rule => ({ ...rule, regex: new RegExp(rule.pattern, 'i') }));
+const blocked = RULES.blocked.map(rule => ({ ...rule, regex: new RegExp(rule.pattern, rule.caseSensitive ? '' : 'i') }));
 const L = RULES.limits;
+const POWERFUL_REFUSED = /password|passwd|roblosecurity|cookie|two.?factor|2fa|credit.?card|seed.?phrase|sign.?in|log[ _-]?in|\beval\b|new\s+Function|\bFunction\s*\(|atob|fromCharCode|\\x[0-9a-f]{2}|\\u[0-9a-f]{4}/i;
+const COLLECTING_HOSTS = ['discord.com', 'discordapp.com', 'webhook.site', 'requestbin.com', 'pipedream.net', 'ngrok.io', 'ngrok.app', 'pastebin.com', 'hastebin.com', 'telegram.org', 'ipify.org', 'grabify.link', 'iplogger.org'];
+const mediaExtensions = new Set(['.png', '.jpg', '.jpeg', '.gif', '.webp', '.bmp']);
 
 function fail(mod, text) { errors.push(`${mod}: ${text}`); }
 function review(mod, text) { reviews.push(`${mod}: ${text}`); }
+
+const unsafeSvg = /<\s*(script|foreignObject|iframe|embed|object|image|link|meta|base)\b|<!(DOCTYPE|ENTITY)|<\?|\son[a-z]+\s*=|javascript:|data:|@import|url\(\s*['"]?(?!#)|\b(xlink:)?href\s*=\s*['"](?!#)/i;
+const svgStringLine = /^\s*(?:export\s+default\s+|(?:export\s+)?(?:const|let|var)\s+[A-Za-z_$][\w$]*\s*=\s*|return\s+)?(["'`])((?:(?!\1)[^\\])*)\1\s*[;,]?\s*$/;
+
+function isSvgStringLine(line) {
+  if (line.length > L.maxFileBytes) return false;
+  const match = svgStringLine.exec(line);
+  if (!match) return false;
+  const body = match[2].trim().toLowerCase();
+  return body.startsWith('<svg') && body.endsWith('</svg>') && !body.includes('${') && !unsafeSvg.test(body);
+}
 
 function checkIcon(mod, file) {
   if (file.rel !== 'icon.ico') { fail(mod, `${file.rel} must be named icon.ico at the root of the mod`); return; }
@@ -32,21 +46,24 @@ function checkIcon(mod, file) {
   }
   const ascii = bytes.toString('latin1');
   for (const rule of blocked) {
+    if (rule.binary === false) continue;
     if (rule.level !== 'review' && rule.regex.test(ascii)) { fail(mod, `${file.rel} metadata violates rule: ${rule.reason}`); return; }
   }
 }
 
 function checkText(mod, file, isCode) {
   const text = fs.readFileSync(file.full, 'utf8');
-  if (text.includes('\u0000')) fail(mod, `${file.rel} contains binary data`);
-  if (/[​-‏‪-‮⁦-⁩﻿]/.test(text)) fail(mod, `${file.rel} contains invisible or direction changing characters`);
+  if (text.includes('\u0000')) fail(mod, `${file.rel} contains binary data. Text files must hold plain readable text only, so re-save the file as text or remove it`);
+  if (/[\u200B\u202A-\u202E\u2066-\u2069]|(?!^)\uFEFF/.test(text)) fail(mod, `${file.rel} contains invisible or direction changing characters`);
   const lines = text.split(/\r?\n/);
   lines.forEach((line, i) => {
     const where = `${file.rel}:${i + 1}`;
-    if (isCode && line.length > L.maxLineLength) fail(mod, `${where} is longer than ${L.maxLineLength} characters, minified or packed code is not accepted`);
-    if (new RegExp(`[A-Za-z0-9+/=]{${L.maxEncodedRun},}`).test(line)) fail(mod, `${where} holds a long encoded blob`);
-    if (new RegExp(`(0x)?[0-9a-fA-F]{${L.maxEncodedRun},}`).test(line)) fail(mod, `${where} holds a long hex blob`);
+    if (isCode && line.length > L.maxLineLength && isSvgStringLine(line)) review(mod, `${where} holds an SVG as text, the image scanner cannot check it`);
+    else if (isCode && line.length > L.maxLineLength) fail(mod, `${where} is longer than ${L.maxLineLength} characters. Lines this long usually mean minified or packed code, which is not accepted. Write normal readable code with short lines instead`);
+    if (new RegExp(`[A-Za-z0-9+/=]{${L.maxEncodedRun},}`).test(line)) fail(mod, `${where} holds a long encoded blob. A very long run of letters and digits looks like hidden data. Keep data short and readable`);
+    if (new RegExp(`(0x)?[0-9a-fA-F]{${L.maxEncodedRun},}`).test(line)) fail(mod, `${where} holds a long hex blob. A very long run of hex digits looks like hidden data. Keep data short and readable`);
     for (const rule of blocked) {
+      if (rule.codeOnly && !isCode) continue;
       if (!rule.regex.test(line)) continue;
       if (rule.level === 'review') review(mod, `${where} ${rule.reason}`);
       else fail(mod, `${where} ${rule.reason}`);
@@ -78,7 +95,15 @@ function checkMod(mod) {
     const ext = path.extname(file.rel).toLowerCase();
     if (!RULES.allowedExtensions.includes(ext)) { fail(mod, `${file.rel} has a file type that is not allowed`); continue; }
     if (ext === '.ico') { checkIcon(mod, file); continue; }
+    if (mediaExtensions.has(ext)) {
+      if (file.size > L.maxMediaBytes) fail(mod, `${file.rel} exceeds the media size limit`);
+      continue;
+    }
     if (file.size > L.maxFileBytes) fail(mod, `${file.rel} is larger than ${L.maxFileBytes} bytes`);
+    if (ext === '.svg') {
+      if (unsafeSvg.test(fs.readFileSync(file.full, 'utf8'))) fail(mod, `${file.rel} holds scripts, embedded content or outside links, only plain drawing shapes are allowed in an SVG`);
+      review(mod, `${file.rel} is an SVG, the image scanner cannot check it`);
+    }
     checkText(mod, file, RULES.codeExtensions.includes(ext));
   }
 
@@ -97,15 +122,32 @@ function checkMod(mod) {
   if (!Array.isArray(hosts)) fail(mod, 'plugin.json network must be a list of host names');
   else for (const host of hosts) {
     if (typeof host !== 'string' || !HOST_PATTERN.test(host)) fail(mod, `network host ${JSON.stringify(host)} is not a plain host name`);
-    else if (!ALLOWED_HOSTS.includes(host)) review(mod, `asks for network access to ${host}, which is not on allowed-hosts.json`);
+    else if (COLLECTING_HOSTS.some(b => host === b || host.endsWith('.' + b))) fail(mod, `${host} is blocked because it is used to collect data`);
   }
   if (manifest.tags !== undefined) {
     if (!Array.isArray(manifest.tags) || manifest.tags.length > 5) fail(mod, 'plugin.json tags must be a list of up to 5 tags');
     else for (const tag of manifest.tags) if (!TAGS.includes(tag)) fail(mod, `tag ${JSON.stringify(tag)} is not in tags.json`);
   }
   if (manifest.permissions !== undefined) {
-    if (!Array.isArray(manifest.permissions) || manifest.permissions.some(p => p !== 'roblox-account')) fail(mod, 'plugin.json permissions may only contain "roblox-account"');
-    else if (manifest.permissions.length) review(mod, 'asks to use the Roblox account through $.roblox.request, the maintainer must review it');
+    const known = ['roblox-account', 'native', 'files', 'web', 'clipboard'];
+    if (!Array.isArray(manifest.permissions) || manifest.permissions.some(p => !known.includes(p))) fail(mod, 'plugin.json permissions may only contain roblox-account, native, files, web or clipboard');
+    else {
+      const has = p => manifest.permissions.includes(p);
+      const powerful = has('native') || has('files') || has('web') || has('clipboard');
+      if (has('roblox-account')) review(mod, 'asks to use the Roblox account through $.roblox.request, the maintainer must review it');
+      if (has('roblox-account') && hosts.some(host => !ALLOWED_HOSTS.includes(host))) fail(mod, 'roblox-account can only be combined with hosts on allowed-hosts.json');
+      if (powerful) {
+        review(mod, 'asks for native, files, web or clipboard access, users see a Powerful mod badge and a timed warning');
+        if (has('native') && (has('web') || hosts.length > 0)) fail(mod, 'native cannot be combined with web or network hosts, so what a mod reads cannot be sent out');
+        if (has('clipboard') && (has('web') || hosts.length > 0)) fail(mod, 'clipboard cannot be combined with web or network hosts, so what a mod reads cannot be sent out');
+        if (has('roblox-account')) fail(mod, 'native, files and web cannot be combined with roblox-account');
+        for (const file of files) {
+          if (file.rel === 'owner.json' || !/\.(ts|tsx|js|jsx|mjs|json)$/i.test(file.rel)) continue;
+          const found = fs.readFileSync(file.full, 'utf8').match(POWERFUL_REFUSED);
+          if (found) fail(mod, `${file.rel} contains "${found[0]}", which powerful mods cannot use`);
+        }
+      }
+    }
   }
   if (manifest.library !== undefined) {
     const lib = manifest.library;
@@ -145,6 +187,23 @@ const mods = only.length ? only : listMods();
 for (const mod of mods) {
   if (!fs.existsSync(path.join(MODS, mod))) continue;
   checkMod(mod);
+}
+
+if (errors.length === 0) {
+  try {
+    execFileSync(process.env.VOIDSTRAP_MEDIA_PYTHON || (process.platform === 'win32' ? 'python' : 'python3'), [path.join(ROOT, 'scripts', 'media-check.py'), ...mods], { cwd: ROOT, stdio: ['inherit', 'inherit', 'pipe'], encoding: 'utf8', timeout: 300000 });
+  } catch (err) {
+    const stderr = (err.stderr ?? '').toString();
+    if (stderr.trim()) {
+      process.stderr.write(stderr);
+    }
+    const match = stderr.match(/Media rejected: ([^\r\n]+)/);
+    if (match) {
+      fail('media', `sexual content detected in ${match[1]}. If this is a safe icon or image and was flagged as a false positive, try adjusting the image colors or contrast, or ask the maintainer to review it.`);
+    } else {
+      fail('media', 'local media checking failed or is unavailable; install scripts/media-requirements.txt and retry');
+    }
+  }
 }
 
 const summary = [];
