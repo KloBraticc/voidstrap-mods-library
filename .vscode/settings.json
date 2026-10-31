@@ -1,0 +1,9 @@
+{
+  "json.schemas": [
+    {
+      "fileMatch": ["mods/*/.voidstrap-mod/plugin.json"],
+      "url": "./types/plugin.schema.json"
+    }
+  ],
+  "typescript.tsdk": "node_modules/typescript/lib"
+}
