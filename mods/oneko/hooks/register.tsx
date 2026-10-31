@@ -63,7 +63,8 @@ let pointerInsideWindow = false;
 const DEFAULT_IDLE_RANGE = 48;
 const FOLLOW_INTERVAL_MS = 33;
 const MAX_STEP_MS = 100;
-const SPEED_BOOST = 1.25;
+const SPEED_BOOST = 4;
+const ANIMATION_BOOST = 2;
 const IDLE_KICK_DELAY_MS = 80;
 const CLICK_FEEDBACK_MS = 420;
 
@@ -127,17 +128,6 @@ function playIdleClick($: import('voidstrap').Engine, event: CursorPosition): vo
   });
 }
 
-function scheduleIdleKick($: import('voidstrap').Engine): void {
-  cancelIdleKickTimer($);
-  idleKickTimerId = $.clock.after(IDLE_KICK_DELAY_MS, () => {
-    idleKickTimerId = undefined;
-    if (settingsPageActive) return;
-    const latestPointer = $.cursor.get();
-    pointerInsideWindow = latestPointer.insideWindow;
-    if (latestPointer.insideWindow) handlePointer($, latestPointer, 'idle');
-  });
-}
-
 function handlePointer(
   $: import('voidstrap').Engine,
   event: CursorPosition,
@@ -180,7 +170,7 @@ function handlePointer(
         lastAnimationFrameAt = $.clock.now();
       } else {
         const animationNow = $.clock.now();
-        const animationIntervalMs = 1000 / currentPrefs.animationFps;
+        const animationIntervalMs = 1000 / (currentPrefs.animationFps * ANIMATION_BOOST);
         if (lastAnimationFrameAt === undefined || animationNow - lastAnimationFrameAt >= animationIntervalMs) {
           frame = (current.frame + 1) % frameCount;
           lastAnimationFrameAt = animationNow;
@@ -322,8 +312,6 @@ export const register: Register = (on) => {
   });
   on('cursor.up', ($, e, next) => {
     pointerInsideWindow = e.insideWindow;
-    if (!settingsPageActive) {
-    }
     return next(e);
   });
   on('cursor.leave', ($, e, next) => {
@@ -350,7 +338,7 @@ export const register: Register = (on) => {
       <Canvas hitTestVisible={false}>
         {rects.map((rect, index) => (
           <Box key={'oneko-svg-pixel-' + index} visible={visible}
-            left={state.x + rect.x} top={state.y + rect.y}
+            left={Math.round(state.x) + rect.x} top={Math.round(state.y) + rect.y}
             width={rect.width} height={rect.height}
             background={rect.background} hitTestVisible={false} />
         ))}
