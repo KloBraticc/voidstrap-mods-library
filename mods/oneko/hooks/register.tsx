@@ -61,7 +61,9 @@ let settingsPageActive = false;
 let pointerInsideWindow = false;
 
 const DEFAULT_IDLE_RANGE = 48;
-const FOLLOW_INTERVAL_MS = 500;
+const FOLLOW_INTERVAL_MS = 33;
+const MAX_STEP_MS = 100;
+const SPEED_BOOST = 1.25;
 const IDLE_KICK_DELAY_MS = 80;
 const CLICK_FEEDBACK_MS = 420;
 
@@ -146,7 +148,7 @@ function handlePointer(
   const now = $.clock.now();
   const elapsedMs = mode === 'initialize'
     ? 0
-    : clamp(now - (lastMovementAt ?? now), 0, FOLLOW_INTERVAL_MS);
+    : clamp(now - (lastMovementAt ?? now), 0, MAX_STEP_MS);
   lastMovementAt = now;
   const width = Math.max(SPRITE_SIZE, event.windowWidth);
   const height = Math.max(SPRITE_SIZE, event.windowHeight);
@@ -167,7 +169,7 @@ function handlePointer(
   let pose: Pose = 'idle';
   let frame = 0;
   if (mode !== 'initialize' && distance > currentPrefs.idleRange) {
-    const step = Math.min(currentPrefs.speed * elapsedMs / 1000, distance - currentPrefs.idleRange);
+    const step = Math.min(currentPrefs.speed * SPEED_BOOST * elapsedMs / 1000, distance - currentPrefs.idleRange);
     if (step > 0.5) {
       x += dx / distance * step;
       y += dy / distance * step;
@@ -194,9 +196,18 @@ function handlePointer(
   }
 
   if (pose !== 'idle') cancelClickAnimationTimer($);
+  const nextX = clamp(x, 0, width - SPRITE_SIZE);
+  const nextY = clamp(y, 0, height - SPRITE_SIZE);
+  const nextClicking = pose === 'idle' ? current.clicking : false;
+  if (
+    nextX === current.x && nextY === current.y && pose === current.pose && frame === current.frame
+    && nextClicking === current.clicking && event.insideWindow === current.visible
+    && width === current.windowWidth && height === current.windowHeight
+  )
+    return;
   update($, scene, () => ({
-    x: clamp(x, 0, width - SPRITE_SIZE),
-    y: clamp(y, 0, height - SPRITE_SIZE),
+    x: nextX,
+    y: nextY,
     pointerX,
     pointerY,
     windowWidth: width,
@@ -204,7 +215,7 @@ function handlePointer(
     visible: event.insideWindow,
     pose,
     frame,
-    clicking: pose === 'idle' ? current.clicking : false
+    clicking: nextClicking
   }));
 }
 
@@ -297,16 +308,11 @@ export const register: Register = (on) => {
       const current = read($, scene);
       const mode = current.windowWidth > 0 && current.windowHeight > 0 ? 'move' : 'initialize';
       handlePointer($, e, mode);
-      scheduleIdleKick($);
     }
     return next(e);
   });
   on('cursor.move', ($, e, next) => {
     pointerInsideWindow = e.insideWindow;
-    if (!settingsPageActive) {
-      handlePointer($, e, 'move');
-      scheduleIdleKick($);
-    }
     return next(e);
   });
   on('cursor.down', ($, e, next) => {
