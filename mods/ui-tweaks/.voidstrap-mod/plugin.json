@@ -1,0 +1,18 @@
+{
+  "name": "ui-tweaks",
+  "version": "1.0.1",
+  "description": "Customize the top navigation bar (dropdown, labeled buttons, or icons only), Home page sections (release banner, Roblox news, catalog, continue playing), and Library page sections (events, what\u0027s new, recent games, all games, sidebar redesign).",
+  "tags": [
+    "settings",
+    "appearance",
+    "pages",
+    "utility",
+    "accessibility"
+  ],
+  "network": [],
+  "userConfig": {},
+  "library": {
+    "id": "93396286/ui-tweaks",
+    "ownerId": 93396286
+  }
+}
