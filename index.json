@@ -1,0 +1,469 @@
+{
+  "schema": 2,
+  "repository": "KloBraticc/voidstrap-mods-library",
+  "commit": "4667225f3be82843d7513930af55298393761b62",
+  "generated": "2026-10-31T22:55:19.348Z",
+  "mods": [
+    {
+      "id": "195697851/friends-display",
+      "name": "friends-display",
+      "ownerId": 195697851,
+      "login": "KloBraticc",
+      "version": "1.0.0",
+      "description": "Live Roblox friend counter pill anchored next to the top-right navigation arrows, with real-time updates.",
+      "tags": [],
+      "network": [],
+      "permissions": [
+        "roblox-account"
+      ],
+      "icon": "icon.ico",
+      "created": "2026-10-27T23:09:52Z",
+      "updated": "2026-10-27T23:09:52Z",
+      "verified": false,
+      "trusted": true,
+      "featured": 0,
+      "fingerprint": "5cdd23fb6c3d77abd4037fd5eed1a12d114322f6f285185b25ac6fa1aa8ee44a",
+      "files": [
+        {
+          "path": ".voidstrap-mod/plugin.json",
+          "size": 338,
+          "sha256": "1f5b0dae1e06d724979ef7022554334f7cb610ac7cfe7242c5f1982a75ac67f1"
+        },
+        {
+          "path": "hooks/hooks.json",
+          "size": 36,
+          "sha256": "ae69340778202da573caae98e922a69467ed1c60953d2bde1800085cc197c1b5"
+        },
+        {
+          "path": "hooks/register.tsx",
+          "size": 3637,
+          "sha256": "9b2955d9853f5891fa0d41a0f5cd4183b49b0d60347876de2240299f0f808e59"
+        },
+        {
+          "path": "hooks/widget.test.tsx",
+          "size": 418,
+          "sha256": "b0be3a8f3cc77dc8172c91fc22d5b770f8616e1ce8e12f0e71cf79dad17c8e34"
+        },
+        {
+          "path": "icon.ico",
+          "size": 14025,
+          "sha256": "3d2b66039c8aa7fa69e241adb2491cf23261906546d35214c0f25ff679f6c8d2"
+        },
+        {
+          "path": "owner.json",
+          "size": 50,
+          "sha256": "a83659e59206048d03f38fc3ce3f716cd7001a97d344484d5eb6f3217f4d7436"
+        }
+      ]
+    },
+    {
+      "id": "195697851/hide-launch-button",
+      "name": "hide-launch-button",
+      "ownerId": 195697851,
+      "login": "KloBraticc",
+      "version": "1.0.0",
+      "description": "Completely hides the Save and Launch button in the footer.",
+      "tags": [],
+      "network": [],
+      "permissions": [],
+      "icon": null,
+      "created": "2026-10-30T21:44:41Z",
+      "updated": "2026-10-30T21:44:41Z",
+      "verified": false,
+      "trusted": true,
+      "featured": 0,
+      "fingerprint": "e69d3401b951b33322f4362b38e99bcd65a7f138831ab0aa06b471768d045105",
+      "files": [
+        {
+          "path": ".voidstrap-mod/plugin.json",
+          "size": 270,
+          "sha256": "c0e7bae8755ac957b2b184cba22c0f11ceed27d157dace7b2bd3d0ddc2d697bb"
+        },
+        {
+          "path": "hooks/hide.test.tsx",
+          "size": 193,
+          "sha256": "827f8d146b3af21a28561959b6162394093e2f6fb271064e79be1b5828529f46"
+        },
+        {
+          "path": "hooks/hooks.json",
+          "size": 30,
+          "sha256": "05560c94f4a912ca75f7dc33b4b2ae5f2a67daddfd9512ad0447ea4b7853e66c"
+        },
+        {
+          "path": "hooks/register.tsx",
+          "size": 337,
+          "sha256": "bedce87a70b2fbd97df93d614712e253228a96c333981751f5391a213071cdd0"
+        },
+        {
+          "path": "owner.json",
+          "size": 50,
+          "sha256": "a83659e59206048d03f38fc3ce3f716cd7001a97d344484d5eb6f3217f4d7436"
+        }
+      ]
+    },
+    {
+      "id": "195697851/minecraft-in-voidstrap",
+      "name": "minecraft-in-voidstrap",
+      "ownerId": 195697851,
+      "login": "KloBraticc",
+      "version": "1.3.1",
+      "description": "Minecraft in Voidstrap: opens Eaglercraft 26 from happinessad.github.io in its own web window with popups blocked.",
+      "tags": [],
+      "network": [
+        "happinessad.github.io"
+      ],
+      "permissions": [
+        "web"
+      ],
+      "icon": "icon.ico",
+      "created": "2026-10-30T20:00:57Z",
+      "updated": "2026-10-30T21:00:18Z",
+      "verified": false,
+      "trusted": true,
+      "featured": 0,
+      "fingerprint": "4101f262ce3fb8e7a6db12a81c88c3b8d7eee6ed8eeb2c2a6a7266b42b4deb58",
+      "files": [
+        {
+          "path": ".voidstrap-mod/plugin.json",
+          "size": 383,
+          "sha256": "44098321b859ab25480392a33e1d35065c01607caa254d8ac096f140dd7d0b65"
+        },
+        {
+          "path": "assets/icon.png",
+          "size": 2753,
+          "sha256": "d9692610cb1878ae961b7f1b45d1c643012b95b40b21859c351cf50f27f94904"
+        },
+        {
+          "path": "hooks/hooks.json",
+          "size": 34,
+          "sha256": "d842d789476d67282d0f04b7e5fdc68a3d981ccec65dd79cfa2d11eed13fb828"
+        },
+        {
+          "path": "hooks/register.tsx",
+          "size": 519,
+          "sha256": "aa7049206063f7784eb5f0f2c828b54b8c649145024f14dc0eeb4ee754bd6c66"
+        },
+        {
+          "path": "icon.ico",
+          "size": 7922,
+          "sha256": "d0560e7851d402b6f09a7dcc8c39de713dcebd7ec696378fbee84c28236fbdf7"
+        },
+        {
+          "path": "owner.json",
+          "size": 50,
+          "sha256": "a83659e59206048d03f38fc3ce3f716cd7001a97d344484d5eb6f3217f4d7436"
+        }
+      ]
+    },
+    {
+      "id": "93396286/multi-display",
+      "name": "multi-display",
+      "ownerId": 93396286,
+      "login": "Cedri4",
+      "version": "1.0.1",
+      "description": "Adds pills to the Voidstrap top bar showing your FastFlag count, mods running, Roblox status, and session time. Toggle each pill from the top bar settings page.",
+      "tags": [
+        "stats",
+        "theme"
+      ],
+      "network": [],
+      "permissions": [],
+      "icon": "icon.ico",
+      "created": "2026-10-29T13:21:43Z",
+      "updated": "2026-10-29T13:40:06Z",
+      "verified": false,
+      "trusted": false,
+      "featured": 0,
+      "fingerprint": "9beaa0e073f35827abc559f350c6d226e7efef501cc94ba721f124e3600af294",
+      "files": [
+        {
+          "path": ".voidstrap-mod/plugin.json",
+          "size": 406,
+          "sha256": "a56d2d6f414d587aa78f1bc733a41f19945e38368927fcffc64d9bba154121a1"
+        },
+        {
+          "path": "fflag.png",
+          "size": 219,
+          "sha256": "3ec35e315c213fb1f1e46063fbdd4170366858e8bd7127bc98b2ef575f04a0aa"
+        },
+        {
+          "path": "hooks/hooks.json",
+          "size": 34,
+          "sha256": "d842d789476d67282d0f04b7e5fdc68a3d981ccec65dd79cfa2d11eed13fb828"
+        },
+        {
+          "path": "hooks/register.tsx",
+          "size": 5545,
+          "sha256": "6cedae75e2b723ee28f4e947a0b982905b7c9e7f2175f6a7c0e81b2e24ab1916"
+        },
+        {
+          "path": "hooks/widget.test.tsx",
+          "size": 551,
+          "sha256": "9a4e1d035a149f1d0d2b8ec16405498d329260b89af959b37efaf84409516242"
+        },
+        {
+          "path": "icon.ico",
+          "size": 67646,
+          "sha256": "771e3e5afc7e02375b5af6cacb5e56e7811832830bf34d6e579e7030b8cf6021"
+        },
+        {
+          "path": "mods.png",
+          "size": 243,
+          "sha256": "3af0ca0b614489a8c02f1cfd7bf4998476607ec24a90e8d916597702ccd8bceb"
+        },
+        {
+          "path": "owner.json",
+          "size": 45,
+          "sha256": "78dee07fde8b21196fc55eb1275ebf199da8ceb987088c0dff144548c87aa8b8"
+        },
+        {
+          "path": "rblx.png",
+          "size": 256,
+          "sha256": "babeec5db06b7133289624e1107b46352c2076d7c0001df9c9f4d9885818f296"
+        },
+        {
+          "path": "session.png",
+          "size": 270,
+          "sha256": "2d92bd094ac6bfb9d7667a23f669f40bf1abecd31773e146d0b4d937524fb919"
+        }
+      ]
+    },
+    {
+      "id": "319643080/oneko",
+      "name": "oneko",
+      "ownerId": 319643080,
+      "login": "SirChreeseAlot",
+      "version": "0.1.3",
+      "description": "Oneko cursor companion with skins.",
+      "tags": [],
+      "network": [],
+      "permissions": [],
+      "icon": "icon.ico",
+      "created": "2026-10-30T18:59:46-05:00",
+      "updated": "2026-10-31T17:54:33-05:00",
+      "verified": false,
+      "trusted": false,
+      "featured": 0,
+      "fingerprint": "4dd41ec14190475098d73787c1442319d291c0a678bf8a566c3b1ea16e38510e",
+      "files": [
+        {
+          "path": ".voidstrap-mod/plugin.json",
+          "size": 190,
+          "sha256": "090178cb5d246b346f249aa39a2e1c581d45546d8554a5ce7582ce223cc0a424"
+        },
+        {
+          "path": "hooks/hooks.json",
+          "size": 43,
+          "sha256": "688fb2ff68361db8e98c84d0ea162aa1e83cc7174141e5b3c7dd4cbb8eeb5e43"
+        },
+        {
+          "path": "hooks/register.tsx",
+          "size": 15800,
+          "sha256": "5e3d7870550cbe182915fe80cb498d838025b309751c4fabefa8c0b9b30df5d9"
+        },
+        {
+          "path": "hooks/skin-svg-data-1.ts",
+          "size": 154019,
+          "sha256": "4e3855e14a513a04e4518328467a46af2a7792c7a809d2b3da7fd97c4d938259"
+        },
+        {
+          "path": "hooks/skin-svg-data-2.ts",
+          "size": 175269,
+          "sha256": "20dd4ba94df5c8365db10a708a28aca4a1b3415a6a20b878540bdc3ec2dc2e5f"
+        },
+        {
+          "path": "hooks/skin-svg-data-3.ts",
+          "size": 192982,
+          "sha256": "b833cd95b75e4c8b6073dfcc3cfeeff0911616a683eb244f22ab7dc705656d73"
+        },
+        {
+          "path": "hooks/skin-svg-data-4.ts",
+          "size": 194784,
+          "sha256": "e05c7343dc0ff14925a9e56b720780b7eadbc2272c44ef332b404f5acfdb1b13"
+        },
+        {
+          "path": "hooks/skin-svg-data-5.ts",
+          "size": 197592,
+          "sha256": "41f97ece51651eefe047c28369f86a631bed13abaec639c9a5024b55267fda87"
+        },
+        {
+          "path": "hooks/skin-svg-data-6.ts",
+          "size": 34048,
+          "sha256": "d6d5c0221dfc9089138d7d2d70bf65e64b705a0c7a2e1220fda82d63b52ef26e"
+        },
+        {
+          "path": "hooks/skin-vectors.ts",
+          "size": 3661,
+          "sha256": "f1ce72ec3cbfd1e812d42309c1717310ca04253077bbce8a350150c84e89f6e6"
+        },
+        {
+          "path": "icon.ico",
+          "size": 991,
+          "sha256": "c627209543e5b646105f8b151bf8594cf1d7c12e2491fe6a97e6a17e37475ada"
+        },
+        {
+          "path": "owner.json",
+          "size": 54,
+          "sha256": "fa6b74fbe735bae555cfa8878668e05d32ddf0144561bfbd5bfe4fa66733b03a"
+        }
+      ]
+    },
+    {
+      "id": "319643080/robux-display",
+      "name": "robux-display",
+      "ownerId": 319643080,
+      "login": "SirChreeseAlot",
+      "version": "0.1.2",
+      "description": "Shows your Roblox Robux balance beside the Friends counter with local display customization.",
+      "tags": [],
+      "network": [],
+      "permissions": [
+        "roblox-account"
+      ],
+      "icon": "icon.ico",
+      "created": "2026-10-28T11:23:27-05:00",
+      "updated": "2026-10-28T14:09:14-05:00",
+      "verified": false,
+      "trusted": false,
+      "featured": 0,
+      "fingerprint": "8cc18677fa9cc07ceaa98e20d541dab4a49db456c046effa080b5456f04f1c45",
+      "files": [
+        {
+          "path": ".voidstrap-mod/plugin.json",
+          "size": 309,
+          "sha256": "f1e393a3dea1daaa01f270d56016a93e8f993835851363a2ab3c62547cd90ac7"
+        },
+        {
+          "path": "hooks/hooks.json",
+          "size": 43,
+          "sha256": "688fb2ff68361db8e98c84d0ea162aa1e83cc7174141e5b3c7dd4cbb8eeb5e43"
+        },
+        {
+          "path": "hooks/register.tsx",
+          "size": 13603,
+          "sha256": "1c9ad5a6608eac948981d74227685dda493a2a45b6705d56a9fdc5576e3101b7"
+        },
+        {
+          "path": "icon.ico",
+          "size": 4941,
+          "sha256": "c64f3e337d7a315714d048664161d55face4378b3cc1df8c27eab37369b84ede"
+        },
+        {
+          "path": "owner.json",
+          "size": 54,
+          "sha256": "fa6b74fbe735bae555cfa8878668e05d32ddf0144561bfbd5bfe4fa66733b03a"
+        }
+      ]
+    },
+    {
+      "id": "93396286/ui-tweaks",
+      "name": "ui-tweaks",
+      "ownerId": 93396286,
+      "login": "Cedri4",
+      "version": "1.0.1",
+      "description": "Customize the top navigation bar (dropdown, labeled buttons, or icons only), Home page sections (release banner, Roblox news, catalog, continue playing), and Library page sections (events, what's new, recent games, all games, sidebar redesign).",
+      "tags": [
+        "settings",
+        "appearance",
+        "pages",
+        "utility",
+        "accessibility"
+      ],
+      "network": [],
+      "permissions": [],
+      "icon": "icon.ico",
+      "created": "2026-10-31T15:37:01-05:00",
+      "updated": "2026-10-31T15:37:01-05:00",
+      "verified": false,
+      "trusted": false,
+      "featured": 0,
+      "fingerprint": "5b9422db47f86d4e2b0f090759abd69f8186cd2dde5c000d1e49f352ec876848",
+      "files": [
+        {
+          "path": ".voidstrap-mod/plugin.json",
+          "size": 547,
+          "sha256": "6a331bdf62842b14c09f2ccb244793255ddaa21288e8da9b4940184a6ea9ab1e"
+        },
+        {
+          "path": "hooks/hooks.json",
+          "size": 35,
+          "sha256": "cb00289411841ac04db5314d4b9f838a1a1527019adc3aedd9155550cf729c23"
+        },
+        {
+          "path": "hooks/register.tsx",
+          "size": 25103,
+          "sha256": "a06591dcd6bd63acfaa6d35337c6e863753b48916287cea15cac7f05f9c99e32"
+        },
+        {
+          "path": "icon.ico",
+          "size": 19079,
+          "sha256": "2c66f08e3c4e63638fc6bb6890f414b33d33bee0702f3587fc1e2eac66ebc89e"
+        },
+        {
+          "path": "owner.json",
+          "size": 45,
+          "sha256": "78dee07fde8b21196fc55eb1275ebf199da8ceb987088c0dff144548c87aa8b8"
+        }
+      ]
+    },
+    {
+      "id": "319643080/version-notice-toggle",
+      "name": "version-notice-toggle",
+      "ownerId": 319643080,
+      "login": "SirChreeseAlot",
+      "version": "1.0.0",
+      "description": "Hide the stupid version notification.",
+      "tags": [],
+      "network": [],
+      "permissions": [],
+      "icon": "icon.ico",
+      "created": "2026-10-31T22:31:27Z",
+      "updated": "2026-10-31T22:31:27Z",
+      "verified": false,
+      "trusted": false,
+      "featured": 0,
+      "fingerprint": "558facb0fd38577496b69f974b263bc3f82fb33df033956b74b6ca6a3e98b531",
+      "files": [
+        {
+          "path": ".voidstrap-mod/plugin.json",
+          "size": 463,
+          "sha256": "e4bae6ac664bd6d8c543164243ac3ab6c6c47948364e63f260c5d3a87932bf49"
+        },
+        {
+          "path": "hooks/hooks.json",
+          "size": 43,
+          "sha256": "688fb2ff68361db8e98c84d0ea162aa1e83cc7174141e5b3c7dd4cbb8eeb5e43"
+        },
+        {
+          "path": "hooks/register.tsx",
+          "size": 348,
+          "sha256": "e955d186bc9c674ef814d158e81dd7a954a029eda0451d06f2d41a9bd4209ab9"
+        },
+        {
+          "path": "icon.ico",
+          "size": 6582,
+          "sha256": "1edc792d972c16815fa76f11d5b373fed8165e97d29080b85f4de305784f9476"
+        },
+        {
+          "path": "owner.json",
+          "size": 54,
+          "sha256": "fa6b74fbe735bae555cfa8878668e05d32ddf0144561bfbd5bfe4fa66733b03a"
+        }
+      ]
+    }
+  ],
+  "blocked": [
+    {
+      "id": "195697851/example-hello",
+      "reason": "test mod, not for users"
+    },
+    {
+      "id": "195697851/note-pad-test",
+      "reason": "test mod used to check review comments"
+    },
+    {
+      "id": "195697851/review-check",
+      "reason": "test mod, not for users"
+    }
+  ]
+}
