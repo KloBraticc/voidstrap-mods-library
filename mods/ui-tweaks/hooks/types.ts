@@ -1,0 +1,1 @@
+export type TopbarMode = 'dropdown' | 'labels' | 'icons';
