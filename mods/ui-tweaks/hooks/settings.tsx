@@ -1,8 +1,9 @@
-import type { TopbarMode } from './types';
+import type { Engine } from 'voidstrap';
+import type { TopbarMode } from './constants';
 import { topbarMode } from './state';
 import { applyTopbarMode } from './topbar';
 
-export const renderSettingsPage = ($: any) => {
+export const renderSettingsPage = ($: Engine) => {
   const { Box, Text, Stack, Button, Card } = $.ui.resolve();
   const mode = read($, topbarMode);
   const stackTopbarPreview = $.window.get().width < 1400;
