@@ -4,9 +4,9 @@ import { topbarMode } from './state';
 import { navItems } from './constants';
 
 export const applyTopbarMode = ($: Engine, mode: TopbarMode) => {
-  $.ui.detach('topbar-nav-buttons');
-  $.ui.undo('topbar-margin');
-  $.ui.undo('hide-pages-button');
+  $.ui.detach('ui-tweaks-topbar-nav-buttons');
+  $.ui.undo('ui-tweaks-topbar-margin');
+  $.ui.undo('ui-tweaks-hide-pages-button');
 
   $.ui.rule({
     id: 'ui-tweaks-topbar-margin',
