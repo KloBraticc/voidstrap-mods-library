@@ -5,13 +5,15 @@ import { applyTopbarMode } from './topbar';
 
 export const renderSettingsPage = ($: Engine) => {
   const { Box, Text, Stack, Button, Card } = $.ui.resolve();
+  // `read` and `update` are ambient helpers injected by the Voidstrap hook
+  // runtime — they get/set an Atom's value through the engine's state store.
   const mode = read($, topbarMode);
   const stackTopbarPreview = $.window.get().width < 1400;
 
   const chooseMode = (nextMode: TopbarMode) => {
     update($, topbarMode, () => nextMode);
-    $.store.set('ui-tweaks.mode', nextMode);
     applyTopbarMode($, nextMode);
+    $.store.set('ui-tweaks.mode', nextMode);
   };
 
   return (
