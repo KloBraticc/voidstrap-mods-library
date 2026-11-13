@@ -1,12 +1,11 @@
 import type { Engine } from 'voidstrap';
-import type { TopbarMode } from './constants';
-import { topbarMode } from './state';
-import { navItems } from './constants';
+import { getNavItems } from '../constants';
+import { getSetting, TopbarMode } from '../settings'
 
 export const applyTopbarMode = ($: Engine, mode: TopbarMode) => {
-  $.ui.detach('ui-tweaks-topbar-nav-buttons');
   $.ui.undo('ui-tweaks-topbar-margin');
   $.ui.undo('ui-tweaks-hide-pages-button');
+  $.ui.undo('ui-tweaks-hide-extensions-button');
 
   $.ui.rule({
     id: 'ui-tweaks-topbar-margin',
@@ -15,14 +14,21 @@ export const applyTopbarMode = ($: Engine, mode: TopbarMode) => {
   });
 
   if (mode === 'dropdown') {
+    // If dropdown mode, just keep everything detached/undone
     $.ui.detach('ui-tweaks-topbar-nav-buttons');
-    $.ui.undo('ui-tweaks-hide-pages-button');
     return;
   }
 
+  // Otherwise, hide default buttons and attach custom nav buttons
   $.ui.rule({
     id: 'ui-tweaks-hide-pages-button',
     target: { name: 'PagesMenuButton' },
+    set: { hidden: true }
+  });
+  //extension button
+  $.ui.rule({
+    id: 'ui-tweaks-hide-extensions-button',
+    target: { name: 'ExtensionsTitleButton' },
     set: { hidden: true }
   });
   $.ui.attach({
@@ -34,14 +40,15 @@ export const applyTopbarMode = ($: Engine, mode: TopbarMode) => {
 
 export const renderTopbar = ($: Engine) => {
   const { Stack, Box, Canvas, Button, Image, Text } = $.ui.resolve();
-  const mode = read($, topbarMode);
+  const mode = getSetting('topbarMode');
+  const navItems = getNavItems($);
   const compact = mode === 'icons' || (mode === 'labels' && $.window.get().width < 1200);
 
   return (
     <Stack
       direction="row"
       gap={compact ? 1 : 5}
-      width={compact ? 180 : 620}
+      width={compact ? 240 : 700}
       height={32}
     >
       <Box
@@ -51,7 +58,7 @@ export const renderTopbar = ($: Engine) => {
         margin="7,0"
         background="#1FFFFFFF"
       />
-      {navItems.map(item => (
+      {navItems.filter((item) => !getSetting(`hideTopBarItem_${item.id}` as `hideTopBarItem_${string}`)).map((item) => (
         <Canvas key={item.id} width={compact ? 32 : item.width} height={32}>
           <Button
             key={item.id + '-press'}
@@ -76,9 +83,9 @@ export const renderTopbar = ($: Engine) => {
             <Text
               key={item.id + '-label'}
               text={item.label}
-              size={13.5}
+              size={13}
               left={30}
-              top={8}
+              top={6}
               hitTestVisible={false}
             />
           )}

@@ -1,17 +1,13 @@
 import type { Register } from 'voidstrap';
+import { applyTopbarMode, renderTopbar } from './renders/topbar';
+import { renderSettingsPage } from './renders/settings';
+import { getSetting } from './settings';
+import { applyMiscsSettings} from './misc';
 
-import { topbarMode } from './state';
-import { applyTopbarMode, renderTopbar } from './topbar';
-import { renderSettingsPage } from './settings';
+const DEFAULT_TOPBAR_MODE = 'icons' as const;
 
 export const register: Register = (on) => {
   on('session.start', ($, e, next) => {
-    const savedMode = $.store.get('ui-tweaks.mode') ?? 'icons';
-    if (savedMode === 'dropdown' || savedMode === 'labels' || savedMode === 'icons') {
-      $.state.set(topbarMode.ref, savedMode);
-    } else {
-      $.state.set(topbarMode.ref, 'labels');
-    }
 
     $.modpages.add({
       id: 'ui-change-settings',
@@ -19,9 +15,8 @@ export const register: Register = (on) => {
       icon: 'Settings24',
     });
 
-    // `read` is an ambient helper injected by the Voidstrap hook runtime — it
-    // reads the current value of an Atom from the engine's state store.
-    applyTopbarMode($, read($, topbarMode));
+    applyMiscsSettings($);
+    applyTopbarMode($, getSetting('topbarMode') ?? DEFAULT_TOPBAR_MODE);
     return next(e);
   });
 
