@@ -339,6 +339,7 @@ declare module 'voidstrap' {
       readonly version: string;
       readonly platform: 'windows' | 'linux' | 'macos';
       texts(): Record<string, string>;
+      icons(): string[];
       setText(target: string, text: string): string;
       clearText(target: string): boolean;
       background(): Json;
@@ -427,6 +428,7 @@ declare module 'voidstrap' {
       request(request: string | { url: string; method?: 'GET' | 'POST'; body?: string }): Promise<FetchResult>;
       account(): Promise<RobloxAccountInfo>;
     };
+    /** clipboard.get and clipboard.set both need the clipboard permission in plugin.json, which makes the mod a powerful mod. */
     clipboard: {
       get(): string;
       set(text: string): void;
