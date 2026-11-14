@@ -354,6 +354,12 @@ function readAiAnswer(raw) {
   }
 }
 
+function modIcon(pr, mod, files) {
+  const pattern = new RegExp(`^mods/${mod}/(?:assets/)?icon\\.(?:png|jpe?g|gif|webp)$`, 'i');
+  const file = files.find(f => f.status !== 'removed' && pattern.test(f.filename));
+  return file && pr.head.repo ? `https://raw.githubusercontent.com/${pr.head.repo.full_name}/${pr.head.sha}/${file.filename}` : '';
+}
+
 async function postSuggestions(pr, mod, files, suggestions) {
   if (!mod || suggestions.length === 0) return;
   const reviews = await gh('GET', `/repos/${repo}/pulls/${pr.number}/reviews?per_page=100`);
@@ -525,7 +531,7 @@ This changes the library itself and no mods, so the mod review does not apply. @
 	    const kind = removing ? 'Mod removed' : baseManifestFile ? 'Mod updated' : 'New mod';
 	    const sent = await sendWebhook(process.env.DISCORD_WEBHOOK_URL, buildEmbed({
 	      kind, mod, oldVersion, version: manifest.version ?? '', author: pr.user.login, url: pr.html_url,
-	      description: `${pr.title}\n${pr.body ?? ''}`, percent: ai.safetyPercent, verdict: ai.verdict, summary: rated ? ai.summary : '',
+	      description: manifest.description ?? '', icon: modIcon(pr, mod, files), percent: ai.safetyPercent, verdict: ai.verdict, summary: rated ? ai.summary : '',
 	      risks: ai.risks ?? [], hosts: Array.isArray(manifest.network) ? manifest.network : [], permissions: Array.isArray(manifest.permissions) ? manifest.permissions : [], files, ready
 	    }));
 	    console.log(sent ? 'Sent the Discord notification.' : 'No valid Discord webhook is set.');

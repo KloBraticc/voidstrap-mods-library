@@ -21,7 +21,7 @@ export function safetyBar(percent) {
   return '🟩'.repeat(green) + '🟥'.repeat(BAR_CELLS - green) + `  **${percent}%**`;
 }
 
-export function buildEmbed({ kind, mod, oldVersion, version, author, url, description, percent, verdict, summary, risks, hosts, permissions, files, ready }) {
+export function buildEmbed({ kind, mod, oldVersion, version, author, url, description, percent, verdict, summary, risks, hosts, permissions, files, ready, icon }) {
   const list = items => (items.length ? items.map(item => compact(item, 80)).join(', ') : 'None');
   const changed = files.slice(0, 12).map(file => `\`${compact(file.filename.replace(`mods/${mod}/`, ''), 70)}\` ${file.status}, +${file.additions} -${file.deletions}`);
   if (files.length > 12) changed.push(`And ${files.length - 12} more`);
@@ -44,6 +44,7 @@ export function buildEmbed({ kind, mod, oldVersion, version, author, url, descri
     url,
     color,
     fields,
+    ...(icon ? { thumbnail: { url: icon } } : {}),
   };
 }
 
