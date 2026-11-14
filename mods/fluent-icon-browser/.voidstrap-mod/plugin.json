@@ -1,6 +1,6 @@
 {
   "name": "fluent-icon-browser",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "Fluent Icon Browser: search every Fluent icon that ships with Voidstrap, filter by size and click any icon to copy its exact name for pages, sidebars and mods.",
   "network": [],
   "permissions": [
