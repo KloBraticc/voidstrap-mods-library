@@ -24,8 +24,7 @@ function sizeOf(name: string): string {
 }
 
 function allIcons(): string[] {
-  if (icons === null)
-    icons = $.app.icons();
+  icons ??= $.app.icons();
   return icons;
 }
 
