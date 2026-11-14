@@ -523,7 +523,7 @@ This changes the library itself and no mods, so the mod review does not apply. @
 	const shaMarks = earlierMarks.filter(mark => mark.includes(pr.head.sha));
 	body += `\n${[...new Set([...shaMarks, webhookMark])].join('\n')}`;
 	await upsertComment(pr, body);
-	if (mod && !alreadySent) {
+	if (mod && (!alreadySent || process.env.GITHUB_EVENT_NAME === 'issue_comment')) {
 	  try {
 	    const baseManifestFile = await gh('GET', `/repos/${repo}/contents/mods/${mod}/.voidstrap-mod/plugin.json?ref=${pr.base.sha}`);
 	    let oldVersion = '';
